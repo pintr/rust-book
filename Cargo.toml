@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "common",
+    "control",
+    "functions",
+    "guessing_game",
+    "hello_cargo",
+    "hello_world",
+    "ownership",
+]
+default-members = ["ownership"]
