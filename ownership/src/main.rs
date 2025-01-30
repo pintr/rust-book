@@ -15,9 +15,7 @@ fn main() {
     return_scope();
     references_borrowing();
     dangling_references();
-    slice_problem();
-    string_slices();
-    slice();
+    slices();
 }
 
 fn ownership() {
@@ -249,37 +247,7 @@ fn dangling_references() {
     }
 }
 
-fn slice_problem() {
-    //! Slices are references to a contiguous sequence of elements in a collection.
-    //! They don't have ownership, and are used to reference a portion of a collection.
-
-    // For example return the first word of a string with multiple words separated by spaces.
-    {
-        let mut s = String::from("hello world");
-        let w = first_word(&s);
-        s.clear(); // This empties the String, making it equal to ""
-
-        // w is still valid, but the value is no longer valid, so it is out of sync with the data in s
-        println!("{w}");
-        fn first_word(s: &String) -> usize {
-            let bytes = s.as_bytes(); // Convert the string to an array of bytes to check element by element
-
-            for (i, &item) in bytes.iter().enumerate() {
-                // Create an iterator over the array of bytes, and enumerate it to get the index and the value
-                if item == b' ' {
-                    // If the value is a space return the index
-                    return i;
-                }
-            }
-            // Otherwise return the length of the string
-            s.len()
-        }
-    }
-}
-
-fn string_slices() {}
-
-fn slice() {
+fn slices() {
     //! A function that returns the first word of a string
     let mut s = String::from("hello world");
     let _word = first_word(&s);
@@ -299,7 +267,7 @@ fn slice() {
 
     println!("{_word}");
 
-    let a = [1,2,3,4,5];
+    let a = [1, 2, 3, 4, 5];
 
     let _slice = &a[1..3]; // Slice of the array, from index 1 to 3 not included: 2,3
 
@@ -309,8 +277,9 @@ fn slice() {
         // Improved version of the function that allows to pass a string slice
         //! The function takes a string reference and returns the index of the first space in the string.
         //! The function returns the length of the first word.
-        let bytes = s.as_bytes(); // Convert the string to an array of bytes
+        let bytes = s.as_bytes(); // Convert the string to an array of bytes to check element by element
         for (i, &item) in bytes.iter().enumerate() {
+            // Create an iterator over the array of bytes, and enumerate it to get the index and the value
             if item == b' ' {
                 // return i; // Return the index of the space
                 return &s[0..i]; // Return the length of the first word
