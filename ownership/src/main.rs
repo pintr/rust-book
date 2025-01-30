@@ -15,6 +15,7 @@ fn main() {
     return_scope();
     references_borrowing();
     dangling_references();
+    slice();
 }
 
 fn ownership() {
@@ -243,5 +244,60 @@ fn dangling_references() {
         let s = String::from("hello"); // String is created
 
         s // Ownership is moved out, so s is valid
+    }
+}
+
+fn slice() {
+    //! A function that returns the first word of a string
+    let mut s = String::from("hello world");
+    let _word = first_word(&s);
+    s.clear(); // This empties the String, making it equal to ""
+
+    // word still has value 5, but it is invalid because the string is empty
+    // println!("the first word is: {_word}"); //
+
+    string_slice();
+
+    let s = String::from("hello world");
+    let _word = first_word(&s[0..6]); // first_word works with string slices
+    let _word = first_word(&s); // first_word with the reference to the whole string
+    let s_literal = "hello world";
+    let _word = first_word(s_literal); // A string literal is a slice
+    let _word = first_word(&s_literal[..]); // The slice of a literal works too
+
+    println!("{_word}");
+
+    let a = [1,2,3,4,5];
+
+    let _slice = &a[1..3]; // Slice of the array, from index 1 to 3 not included: 2,3
+
+    // fn first_word(s: &String) -> usize {
+    // fn first_word(s: &String) -> &str {
+    fn first_word(s: &str) -> &str {
+        // Improved version of the function that allows to pass a string slice
+        //! The function takes a string reference and returns the index of the first space in the string.
+        //! The function returns the length of the first word.
+        let bytes = s.as_bytes(); // Convert the string to an array of bytes
+        for (i, &item) in bytes.iter().enumerate() {
+            if item == b' ' {
+                // return i; // Return the index of the space
+                return &s[0..i]; // Return the length of the first word
+            }
+        }
+        &s[..] // Full string
+    }
+
+    fn string_slice() {
+        //! String slices are references to a part of a String.
+        //! They have the type &str, which is a reference to a string slice.
+        let s = String::from("hello world");
+        let len = s.len();
+        let _hello = &s[0..5]; // The first five characters of the string
+        let _world = &s[6..11]; // The rest of the string
+        let _slice = &s[0..2]; // From char at index 0 to char at index 1
+        let _slice = &s[..2]; // As above, without specifiying the start index
+        let _slice = &s[3..len]; // From char at index 3 to the end of the string
+        let _slice = &s[3..]; // As above, without specifiying the end index
+        let _slice = &s[..]; // The whole string, could be [0..len]
     }
 }
