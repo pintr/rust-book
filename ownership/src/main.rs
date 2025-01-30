@@ -15,6 +15,8 @@ fn main() {
     return_scope();
     references_borrowing();
     dangling_references();
+    slice_problem();
+    string_slices();
     slice();
 }
 
@@ -246,6 +248,36 @@ fn dangling_references() {
         s // Ownership is moved out, so s is valid
     }
 }
+
+fn slice_problem() {
+    //! Slices are references to a contiguous sequence of elements in a collection.
+    //! They don't have ownership, and are used to reference a portion of a collection.
+
+    // For example return the first word of a string with multiple words separated by spaces.
+    {
+        let mut s = String::from("hello world");
+        let w = first_word(&s);
+        s.clear(); // This empties the String, making it equal to ""
+
+        // w is still valid, but the value is no longer valid, so it is out of sync with the data in s
+        println!("{w}");
+        fn first_word(s: &String) -> usize {
+            let bytes = s.as_bytes(); // Convert the string to an array of bytes to check element by element
+
+            for (i, &item) in bytes.iter().enumerate() {
+                // Create an iterator over the array of bytes, and enumerate it to get the index and the value
+                if item == b' ' {
+                    // If the value is a space return the index
+                    return i;
+                }
+            }
+            // Otherwise return the length of the string
+            s.len()
+        }
+    }
+}
+
+fn string_slices() {}
 
 fn slice() {
     //! A function that returns the first word of a string
