@@ -194,4 +194,94 @@ fn rectangle() {
     }
 }
 
-fn method_syntax() {}
+fn method_syntax() {
+    //! Methods are similar to functions, but are defined within the context of a struct (or enum or trait object).
+    //! They are called on an instance of the struct and can access and modify the data of the struct.
+    // Define a struct for the rectangle
+    #[derive(Debug)]
+    struct Rectangle {
+        width: u32,
+        height: u32,
+    }
+    // To define a method we use the `impl` keyword followed by the name of the struct.
+    // The method is defined within the context of the struct
+    // It needs the first parameter to be `&self` of type Self which refers to the instance of the struct.
+    // Methods can take ownership of self, borrow self immutably as we do here, or borrow self mutably, just as with any other parameter.
+
+    // Each struct can have multiple `impl` blocks. This is useful for generic types and traits.
+
+    impl Rectangle {
+        // Methods definition
+
+        fn area(&self) -> u32 {
+            // Calculate the area of the rectangle
+            self.width * self.height
+        }
+
+        // A method can have the same name of a field
+        // Usually, this is done when the method is a getter of the field
+        // Getters are used to access the value of a private field.
+        // Unlike C and C++ where -> is used to access methods of a pointer, in Rust there is only the . operator.
+        fn width(&self) -> bool {
+            // Check whether the width is positive
+            self.width > 0
+        }
+
+        // A method can take more than one parameter
+        fn can_hold(&self, other: Rectangle) -> bool {
+            // Check whether a rectangle can hold another rectangle
+            self.width > other.width && self.height > other.height
+        }
+
+        // All the functions defined in the `impl` block are called associated functions.
+        // Associted functions can be defined without self as a parameter, when they don't need an instance of the type.
+        // E.g. String::from is an associated funciton of the String type.
+        // Associated functions that aren't methods are often used for constructors that will return a new instance of the struct.
+        fn square(size: u32) -> Self {
+            // Create a square with sides of the `size` length
+            // This method is called using the `::` syntax, like a namespace.
+            Self {
+                width: size,
+                height: size,
+            }
+        }
+    }
+
+    {
+        let rect = Rectangle {
+            width: 30,
+            height: 50,
+        };
+
+        println!(
+            "The area of the rectangle is {} square pixels.",
+            rect.area() // Method syntax, we call the method on the instance of the struct.
+        );
+
+        if rect.width() {
+            println!("The rectangle has a positive width: {}", rect.width);
+        }
+    }
+
+    {
+        let rect1 = Rectangle {
+            width: 30,
+            height: 50,
+        };
+        let rect2 = Rectangle {
+            width: 10,
+            height: 40,
+        };
+        let rect3 = Rectangle {
+            width: 60,
+            height: 45,
+        };
+
+        println!("Can rect1 hold rect2? {}", rect1.can_hold(rect2));
+        println!("Can rect1 hold rect3? {}", rect1.can_hold(rect3));
+    }
+    {
+        let square = Rectangle::square(10); // We call the associated function using the `::` syntax.
+        println!("The area of the square is {} square pixels.", square.area());
+    }
+}
