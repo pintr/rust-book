@@ -8,5 +8,6 @@ members = [
     "hello_cargo",
     "hello_world",
     "ownership",
+    "structs",
 ]
-default-members = ["ownership"]
+default-members = ["structs"]
