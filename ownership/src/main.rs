@@ -261,9 +261,11 @@ fn slices() {
     let s = String::from("hello world");
     let _word = first_word(&s[0..6]); // first_word works with string slices
     let _word = first_word(&s); // first_word with the reference to the whole string
-    let s_literal = "hello world";
+    let mut s_literal = "hi world"; // A literal can be mutable
+    println!("{s_literal}");
+    s_literal = "ciao";
     let _word = first_word(s_literal); // A string literal is a slice
-    let _word = first_word(&s_literal[..]); // The slice of a literal works too
+    let _word = first_word(&s_literal[1..3]); // The slice of a literal works too
 
     println!("{_word}");
 
