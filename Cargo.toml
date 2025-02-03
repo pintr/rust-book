@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "common",
     "control",
+    "enums",
     "functions",
     "guessing_game",
     "hello_cargo",
@@ -10,4 +11,4 @@ members = [
     "ownership",
     "structs",
 ]
-default-members = ["structs"]
+default-members = ["enums"]
