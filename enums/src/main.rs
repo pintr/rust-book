@@ -247,4 +247,19 @@ fn match_control() {
     }
 }
 
-fn if_let() {}
+fn if_let() {
+    //! if let is a construct that allows to match a single pattern, and ignore the rest.
+    // It is useful when we are interested in only one pattern, and we don't want to list all the possible patterns.
+    let config_max = Some(3u8);
+    match config_max {
+        Some(max) => println!("Max: {}", max),
+        _ => (),
+    }
+    // The same can be achieved with if let
+    // The if let construct takes a pattern and an expression separated by an equal sign.
+    if let Some(max) = config_max {
+        println!("Max: {}", max);
+    }
+    // In this case the pattern is Some(max), and max binds to the value of Some.
+    // max can be used in the body of the if let block.
+}
