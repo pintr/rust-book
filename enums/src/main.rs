@@ -6,6 +6,7 @@ fn main() {
     message();
     option();
     match_control();
+    if_let();
 }
 
 #[allow(dead_code)]
@@ -122,4 +123,128 @@ fn option() {
     // In order to use Option<T> the code needs to handle each variant, so it will run only when there is Some(T), or when there is a None.
 }
 
-fn match_control() {}
+#[allow(dead_code)]
+fn match_control() {
+    //! The match control flow operator is used to compare a value against a series of patterns and then execute code based on which pattern matches.
+    // The match operator is similar to a switch statement in other languages.
+    // The match expression acts like a coin sorting machine where the coin falls in the first matching slot.
+    // Match is composed by arms separated by a comma, each arm has a pattern and the code to run if the value matches the pattern, separated by =>.
+    // The match arms are evaluated from top to bottom, and the first match is executed.
+    {
+        enum Coin {
+            Penny,
+            Nickel,
+            Dime,
+            Quarter,
+        }
+
+        fn value_in_cents(coin: Coin) -> u8 {
+            match coin {
+                Coin::Penny => {
+                    // Code to run if the value matches the pattern
+                    println!("Lucky penny!");
+                    1
+                }
+                Coin::Nickel => 5,
+                Coin::Dime => 10,
+                Coin::Quarter => 25,
+            }
+        }
+
+        let penny = Coin::Penny;
+        println!("Value in cents of a penny: {}", value_in_cents(penny))
+    }
+    {
+        // An enum can also have data associated with its variants.
+        // In this case, the match operator can destructure the data and use it in the code.
+        #[derive(Debug)]
+        enum UsState {
+            Alabama,
+            Alaska,
+        }
+
+        enum Coin {
+            Penny,
+            Nickel,
+            Dime,
+            Quarter(UsState),
+        }
+
+        fn value_in_cents(coin: Coin) -> u8 {
+            match coin {
+                Coin::Penny => 1,
+                Coin::Nickel => 5,
+                Coin::Dime => 10,
+                Coin::Quarter(state) => {
+                    println!("State quarter from {:?}!", state);
+                    25
+                }
+            }
+        }
+
+        let quarter = Coin::Quarter(UsState::Alaska);
+        println!("Value in cents of a quarter: {}", value_in_cents(quarter))
+    }
+    {
+        // The match expression allows to compare the variants of Option<T too, for example in the case of Option<i32>.
+        // The match operator can be used to handle the Some(T) and None variants, for example to add one to the value of an Option<i32>.
+
+        fn plus_one(x: Option<i32>) -> Option<i32> {
+            match x {
+                Some(i) => Some(i + 1),
+                None => None,
+            }
+        }
+        let five = Some(5);
+        let six = plus_one(five);
+        let none = plus_one(None);
+        println!("Six: {:?}, None: {:?}", six, none);
+    }
+    {
+        // The arms of a match expression must handle all the possible values of the value being matched.
+        // So matches in Rust are exhaustive, and the compiler will check if all the possible cases are handled.
+        // If the compiler can't be sure that all possible cases are handled, it will throw an error.
+        // fn plus_one(x: Option<i32>) -> Option<i32> {
+        //     match x {
+        //         // None is not covered, so the compiler gives an error
+        //         Some(i) => Some(i + 1),
+        //     }
+        // }
+        // Rust provides a catch-all patterns for the cases that are not explicitly handled
+        let dice_roll = 9;
+        match dice_roll {
+            3 => add_fancy_hat(),
+            7 => remove_fancy_hat(),
+            other => move_player(other),
+        }
+
+        fn add_fancy_hat() {
+            println!("Adding fancy hat");
+        }
+        fn remove_fancy_hat() {
+            println!("Removing fancy hat");
+        }
+        fn move_player(num_spaces: u8) {
+            println!("Moving player {} spaces", num_spaces);
+        }
+        // In this case all the values that are not 3 or 7 fall in the `other` arm.
+        // There is a value for the default case without the need to use the value: _.
+        match dice_roll {
+            3 => add_fancy_hat(),
+            7 => remove_fancy_hat(),
+            _ => reroll(),
+        }
+        fn reroll() {
+            println!("Rerolling the dice");
+        }
+        // In this case the exhaustive check is satisfied by the _.
+        // If we want the default value to do nothing, we can use the empty tuple ().
+        match dice_roll {
+            3 => add_fancy_hat(),
+            7 => remove_fancy_hat(),
+            _ => (),
+        }
+    }
+}
+
+fn if_let() {}
