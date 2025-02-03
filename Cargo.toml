@@ -8,7 +8,8 @@ members = [
     "guessing_game",
     "hello_cargo",
     "hello_world",
+    "module_system",
     "ownership",
     "structs",
 ]
-default-members = ["enums"]
+default-members = ["module_system"]
