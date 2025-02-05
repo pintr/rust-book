@@ -6,15 +6,12 @@
 /// - Modules and use: Let you control the organization, scope, and privacy of paths
 /// - Paths: A way of naming an item, such as a struct, function, or module
 /// The examples are in src/lib.rs
-use c7_module_system::eat_at_restaurant;
 
 fn main() {
     packages_crates();
     modules();
     paths();
     use_keyword();
-
-    eat_at_restaurant();
 }
 
 fn packages_crates() {
@@ -116,4 +113,12 @@ fn paths() {
     // In contrast for an enum if it is public, all its variants are public.
 }
 
-fn use_keyword() {}
+fn use_keyword() {
+    //! The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
+    // The use keyword allows to create a sort of symbolic link to the path, so it can be used without the full path.
+    use c7_module_system::eat_at_restaurant;
+    {
+        c7_module_system::eat_at_restaurant(); // Without the use keyword
+        eat_at_restaurant(); // With the use keyword
+    }
+}
