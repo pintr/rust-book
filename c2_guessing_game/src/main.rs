@@ -1,3 +1,5 @@
+/// Guessing game
+/// Find the secret number between 1 and 100
 use rand::Rng;
 use std::cmp::Ordering;
 use std::io;

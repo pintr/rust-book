@@ -1,4 +1,6 @@
-fn main() {
+/// Control flow in Rust
+
+pub(crate) fn main() {
     if_else(2);
     multiple_conditions(6);
     if_let(true);

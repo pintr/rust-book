@@ -1,4 +1,6 @@
-fn main() {
+/// Functions in Rust.
+
+pub(crate) fn main() {
     another_function(2);
     print_measure(5, 'm');
     statement();

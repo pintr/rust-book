@@ -1,3 +1,8 @@
+mod control;
+mod functions;
+
+/// Commmon programming concepts in Rust.
+
 fn main() {
     mutability();
     shadow();
@@ -5,13 +10,16 @@ fn main() {
     chars();
     tuples();
     arrays();
+
+    functions::main();
+    control::main();
 }
 
-/// Demonstrates variable mutability in Rust.
-///
-/// This function creates a mutable variable `x`, prints its initial value,
-/// modifies the value of `x`, and then prints the updated value.
 fn mutability() {
+    //! Demonstrates variable mutability in Rust.
+    // This function creates a mutable variable `x`, prints its initial value,
+    // modifies the value of `x`, and then prints the updated value.
+
     let mut x = 5;
     println!("The value of x is: {x}");
 
@@ -19,13 +27,13 @@ fn mutability() {
     println!("The value of x is: {x}");
 }
 
-/// Demonstrates variable shadowing in Rust.
-///
-/// This function creates a variable `x`, shadows it with a new value,
-/// and then shadows it again within an inner scope. It prints the value
-/// of `x` at different points to show how shadowing works. Additionally,
-/// it demonstrates shadowing with a variable of a different type.
 fn shadow() {
+    //! Demonstrates variable shadowing in Rust.
+    // This function creates a variable `x`, shadows it with a new value,
+    // and then shadows it again within an inner scope. It prints the value
+    // of `x` at different points to show how shadowing works. Additionally,
+    // it demonstrates shadowing with a variable of a different type.
+
     let x = 5;
     let x = x + 1;
 
@@ -44,6 +52,8 @@ fn shadow() {
 }
 
 fn operations() {
+    //! Demonstrates basic operations in Rust.
+
     let _sum = 5 + 10;
     let _difference = 95.5 - 4.3;
     let _product = 4 * 30;
@@ -54,12 +64,16 @@ fn operations() {
 }
 
 fn chars() {
+    //! Demonstrates character types in Rust.
+
     let _c = 'z';
     let _z = 'ℤ';
     let _heart_eyed_cat = '😻';
 }
 
 fn tuples() {
+    //! Demonstrates tuples in Rust.
+
     let _tup: (i32, f64, u8) = (500, 6.4, 1);
     let (_x, _y, _z) = _tup;
     let _five_hundred = _tup.0;
@@ -72,6 +86,8 @@ fn tuples() {
 }
 
 fn arrays() {
+    //! Demonstrates arrays in Rust.
+
     let _a = [1, 2, 3, 4, 5];
     let _b = [2; 5];
     for e in _b {

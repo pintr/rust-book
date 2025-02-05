@@ -1,15 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
-    "common",
-    "control",
-    "enums",
-    "functions",
-    "guessing_game",
-    "hello_cargo",
-    "hello_world",
-    "module_system",
-    "ownership",
-    "structs",
+    "c1_hello_world",
+    "c2_guessing_game",
+    "c3_common",
+    "c4_ownership",
+    "c5_structs",
+    "c6_enums",
+    "c7_module_system",
 ]
-default-members = ["module_system"]
+default-members = ["c3_common"]
