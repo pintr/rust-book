@@ -5,13 +5,16 @@
 /// - Crates: A tree of modules that produces a library or executable
 /// - Modules and use: Let you control the organization, scope, and privacy of paths
 /// - Paths: A way of naming an item, such as a struct, function, or module
+/// The examples are in src/lib.rs
+use c7_module_system::eat_at_restaurant;
 
 fn main() {
-    println!("Hello, world!");
-
     packages_crates();
     modules();
     paths();
+    use_keyword();
+
+    eat_at_restaurant();
 }
 
 fn packages_crates() {
@@ -37,13 +40,13 @@ fn packages_crates() {
 fn modules() {
     //! Modules are a way to organize code within a crate for readability, reuse, and privacy of items.
 
-    // In order to work with modules is important to understand the use of paths, use and pub keywords, how they work in the compiler, and how the code is organized:
+    // In order to work with modules it is important to understand the use of paths, use and pub keywords, how they work in the compiler, and how the code is organized:
     // Crate root: The compiler at first looks for the crate root to compile: src/main.rs for binaries, src/lib.rs for libraries.
     // Declaring modules: Modules are declared with the mod keyword followed by the name of the module and a block containing the definitions of the module.
     //                    When running `mod garden` the compiler looks for the module's code inline, in the file src/garden.rs, or src/garden/mod.rs.
     // Declaring submodules: Submodules are declared in the same way as modules, but they are nested inside the parent module, it follows the same rules as modules.
     //                       Running `mod vegetables` the compiler looks for the module's code inline, in the file src/garden/vegetables.rs, or src/garden/vegetables/mod.rs.
-    // Paths: When a module is part of a crate the code is referenceable  from anywhere in the same crate (if the privacy rules allows it) using the path to the code.
+    // Paths: When a module is part of a crate the code is referenceable from anywhere in the same crate (if the privacy rules allows it) using the path to the code.
     // Private vs Public: By default, the items in a module are private, but the pub keyword can be used to make them public.
     // Keyword `use`: The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
     // Considering the following project structure:
@@ -56,7 +59,8 @@ fn modules() {
     //     ├── garden.rs
     //     └── main.rs
     // And the main being:
-    // ```use crate::garden::vegetables::Asparagus;
+    // ```
+    // use crate::garden::vegetables::Asparagus;
 
     // pub mod garden;
 
@@ -65,29 +69,14 @@ fn modules() {
     //     println!("I'm growing {plant:?}!");
     // }```
     // The `pub mod garden;` line in main.rs tells the compiler to include the code it finds in `src/garden.rs`:
-    // ```#[derive(Debug)]
+    // ```
+    // #[derive(Debug)]
     // pub struct Asparagus {}```
 
     // Modules lets users to organize code within a crate into groups for readability and reuse, and even control the privacy of items.
     // the code in a module is private by default, private items can't be accessed from outside the module.
-    // For example in the context of a restaurant the front of the house is public, but the back of the house is private:
-    // Create a library named restaurant: `cargo new restaurant --lib` with the folowing structure:
-    // ```mod front_of_house {
-    //     mod hosting {
-    //         fn add_to_waitlist() {}
-
-    //         fn seat_at_table() {}
-    //     }
-
-    //     mod serving {
-    //         fn take_order() {}
-
-    //         fn serve_order() {}
-
-    //         fn take_payment() {}
-    //     }
-    // }```
-    // The code above defines a module named front_of_house with two child modules: hosting and serving.
+    // For example in the context of a restaurant the front of the house is public, but the back of the house is private, check lib.rs for the example.
+    // The code defines a module named front_of_house with two child modules: hosting and serving.
     // Each child modules contains functions related to the module it belongs to.
     // The child modules at the same level (hosting and serving) are siblings.
     // The parent module is the root of the module tree, and the child modules are leaves.
@@ -99,4 +88,32 @@ fn paths() {
     // - Absolute: Full path starting from a crate root by using a crate name or a literal crate.
     // - Relative: Starts from the current module and uses self, super, or an identifier in the current module.
     // Both absolute and relative paths are followed by one or more identifiers separated by double colons (::).
+    // In order to use a function it is necessary to use the path, absolute or relative, to the function, for example:
+    // Absolute: crate::front_of_house::hosting::add_to_waitlist();
+    // Relative: front_of_house::hosting::add_to_waitlist();
+
+    // If there is a function, which is part of the public API of a library, such as eat_at_restaurant, it can be called outside if marked with the pub keyword.
+    // This funciton can call the add_to_waitlist function from the front_of_house module, both using the absolute and relative paths, since it is in the same crate.
+    // The choice between absolute and relative paths depends on the context and the code organization.
+    // The correct path isn't enough, the function must be public in order to be called from outside the module.
+    // In Rust, everything is private by default to parent modules, so the pub keyword must be used to make the function public.
+    // items in a parent module can't use private items inside child modules, but the opposite is possible.
+    // This is because a child module hides its implementation details, but it can see the context of its parent.
+    // To use a function in a public module, the function needs to be public as well, these privacy rules apply to structs, enums, modules, functions, and methods.
+    // In a public library crate the public functions, so the APIs, are the "contract" with the users, and define how they can interact with the code.
+    // A package can have both a library and a binary crate
+    // Both crates will have the package name, the binary crate will call the code in the library crate.
+    // Only the library crate can be shared with other crates, the binary crate is specific to the package.
+    // The library crate can be made public, and the binary crate uses the library crate as a dependency.
+
+    // Another way to construct a relative path is to use the super keyword, which refers to the parent module. Such as `..` in a file system. Check lib.rs for the example.
+    // In this case super is used to refer to the deliver_order function which is a sibling of the module back_of_house.
+
+    // No only functions can be made public, but structs and enums too.
+    // The private parts cannot be accessed from outside the module, only the public parts can.
+    // For this reason in eat_at_restaurant the toast field can be accessed, but the seasonal_fruit field cannot.
+    // Additionally, since seasonal_fruit is private, we need a public constructor to create a Breakfast instance that sets the seasonal_fruit field.
+    // In contrast for an enum if it is public, all its variants are public.
 }
+
+fn use_keyword() {}

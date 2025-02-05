@@ -9,4 +9,4 @@ members = [
     "c6_enums",
     "c7_module_system",
 ]
-default-members = ["c3_common"]
+default-members = ["c7_module_system"]
