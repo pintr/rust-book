@@ -8,5 +8,6 @@ members = [
     "c5_structs",
     "c6_enums",
     "c7_module_system",
+    "c8_collections",
 ]
-default-members = ["c7_module_system"]
+default-members = ["c8_collections"]

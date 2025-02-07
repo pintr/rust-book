@@ -1,7 +1,6 @@
 [package]
-name = "c7_module_system"
+name = "c8_collections"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rand = "0.8.5"

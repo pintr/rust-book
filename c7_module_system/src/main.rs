@@ -12,6 +12,7 @@ fn main() {
     modules();
     paths();
     use_keyword();
+    split_modules();
 }
 
 fn packages_crates() {
@@ -116,9 +117,88 @@ fn paths() {
 fn use_keyword() {
     //! The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
     // The use keyword allows to create a sort of symbolic link to the path, so it can be used without the full path.
-    use c7_module_system::eat_at_restaurant;
     {
+        use c7_module_system::eat_at_restaurant;
+
         c7_module_system::eat_at_restaurant(); // Without the use keyword
         eat_at_restaurant(); // With the use keyword
     }
+    // Usually the parent is brought into scope, so, to call a from a child module, the parent module needs to be specified, making it clear that the function isn't local.
+    // Additionally, using the parent module, distiguishes elements that may have the same name in different modules.
+    {
+        use std::collections::HashMap;
+        use std::fmt;
+        use std::io;
+
+        let mut map = HashMap::new();
+        map.insert(1, 2);
+
+        fn _function1() -> fmt::Result {
+            Ok(())
+        } // Result from fmt module
+        fn _function2() -> io::Result<()> {
+            Ok(())
+        } // Resuklt from io module
+    }
+    // Another solution to this problem is to use the as keyword to create an alias for the path.
+    {
+        use std::fmt::Result;
+        use std::io::Result as IoResult;
+
+        fn _function1() -> Result {
+            Ok(())
+        }
+        fn _function2() -> IoResult<()> {
+            Ok(())
+        }
+    }
+    // When a name is brought into scope with the use keyword, the name is private by default.
+    // to enable the use of the name outside of the module, the pub keyword must be used.
+    // Re-exporting is useful to keep the code organized and to provide a public API may be different from the internal organization.
+    // In this way the structure is mantained, but the public API is different.
+    #[allow(dead_code)]
+    {
+        pub use c7_module_system::front_of_house::hosting;
+
+        pub fn eat_at_restaurant() {
+            hosting::add_to_waitlist();
+        }
+    }
+    // The use word is used for bring external packages into scope too.
+    // Many external packages, called crates, can be found at crates.io.
+    // The standard library std is a crate too, it doesn't need to be included in the Cargo.toml file, but it can be used with the use keyword.
+    {
+        use rand::Rng;
+        use std::collections::HashMap;
+
+        let mut map = HashMap::new();
+        map.insert(1, rand::thread_rng().gen_range(1..100)); // Add a random number to the map with the key 1
+    }
+    // If there are multiple items from the same crate, they can be brought into scope with a single use keyword.
+    // If two paths share one part which completes one of the two paths, the word `self` can be used to refer to the shared part.
+    #[allow(unused_imports)]
+    {
+        use std::io::{self, Write};
+        use std::{cmp::Ordering, collections::HashMap};
+
+        let _map: HashMap<i32, i32> = HashMap::new();
+        fn _function1() -> Ordering {
+            Ordering::Less
+        }
+        fn _function2() -> io::Result<()> {
+            Ok(())
+        }
+    }
+    // If there is the need to bring all the public items defined in a path into scope, the glob operator `*` can be used.
+    #[allow(unused_imports)]
+    use std::collections::*;
+}
+
+fn split_modules() {
+    //! In order to make the code easier to navigate, it may be useful to split the code into multiple files.
+    // For example we may want to separate the front_of_house module from the lib.rs file.
+    // Additionally the hosting module can be extrated from the front_of_house module into its own file.
+    // In this case the front_of_house module is defined in src/front_of_house.rs and the hosting module is defined in src/front_of_house/hosting.rs.
+    // This is the new style, the old style is to use a mod.rs file, but the new style is more idiomatic.
+    // If both styles are used in the same project, the compiler will throw an error.
 }
