@@ -9,5 +9,6 @@ members = [
     "c6_enums",
     "c7_module_system",
     "c8_collections",
+    "c9_error_handling",
 ]
-default-members = ["c8_collections"]
+default-members = ["c9_error_handling"]
