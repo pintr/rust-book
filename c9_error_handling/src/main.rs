@@ -177,4 +177,64 @@ fn recoverable_errors() {
     }
 }
 
-fn when_panic() {}
+fn when_panic() {
+    //! Guidelines to define when to use `panic!` and `Result`
+    // Both can be used in any case, but id doesn't make sense.
+    // The basic idea is that panic stops completely the execution, while Result leaves the coiche to the calling code, that, in case of Err can panic.
+    // In general, knowing that a function might fail, Result is a good choice.
+    {
+        // Examples, prototype code, and test -> Panic
+        // Examples: since they are to illustrate some concept, is better including robust error-handling. In particular when methods such as `unwrap` are used.
+        // Prototyping: Methods like `unwrap`, and `expect` are very convienient when prototyping. It makes clear markers in order to make the code more robust.
+        // Test: When a method in a test fails, the whole test should fail, so, if using `unwrap`, and `expect` give an error, the test should fail.
+    }
+    {
+        // More information than the compiler -> Result
+        // When it's sure that an `unwrap` or an `expect` will result in an Ok ensured by the logic, it's appropriate to return the Result
+        // This because it's logically impossible that it fails, i.e. parsing an hardcoded IP will never result in an Err
+        // Obviously, if the IP is inserted by the user, that could result in an error, so Result may not be the best choice.
+    }
+    {
+        // Guidelines for error handling
+        // Always panic when there is a possibility that the code ends in a bad state.
+        // A bad state happens when some assumption, guarantee, contract, or invariant has been broken, i.e. values that are invalid, missing, or contradictory.
+        // A bad state has the following characteristics:
+        // Unexpected, it can't happen occasionally, i.e. wrong user input.
+        // The code relies on not being in a wrong state.
+        // The given information can't be encoded in a type in use.
+        // If someone calls the code passing wrong values it's better returning an error.
+        // If continuing after the input could be dangerous better panicking with a message.
+        // The same when working with an external code that returns an invalid state.
+        // As always, if the failure is expected, better returning a `Result`, such as parsing malformed data or wrong status from HTTP.
+        // When an operation puts anuser at risk better verify the values if they are valid and panic if they are not.
+        // Working on invalid data can expose the code to vulnerabilities, i.e. `std` calls panic when trying to access out-of-bound memory.
+        // Functions often have contracts that guarantee the behaviour if the input meet the requirements, panic if they don't.
+        // The Rust type system allows to check many errors without the need of doing it manually, i.e. type checking.
+        // If a paramter has the wrong type, the code won't compile, i.e. when a parameter has a specific type rather than an Option, u32 ensures only positive integers.
+    }
+    {
+        // Custom types for validation
+        // To ensure a valid value a new custom type can be done, so there is not the requirement to check every possibility
+        // With a new type the validation is performed in a funciton that creates an instance of the type, so only valid values are instantiated.
+        pub struct _Guess {
+            value: i32,
+        }
+        #[allow(dead_code)]
+        impl _Guess {
+            pub fn new(value: i32) -> _Guess {
+                if value < 1 || value > 100 {
+                    panic!("Guess value must be between 1 and 100, got {value}.");
+                }
+
+                _Guess { value }
+            }
+
+            pub fn value(&self) -> i32 {
+                self.value
+            }
+        }
+        // In this example a `Guess` accepts a i32, so from -2^31 to 2^31 - 1, but only values from 1 to 100 are valid
+        // If the value is not in that range the program will panic
+        // The function value is a getter, obviously it only works if the value is valid
+    }
+}
