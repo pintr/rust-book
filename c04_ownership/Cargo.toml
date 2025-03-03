@@ -1,7 +1,6 @@
 [package]
-name = "c2_guessing_game"
+name = "c04_ownership"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rand = "0.8.5"

@@ -118,9 +118,9 @@ fn use_keyword() {
     //! The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
     // The use keyword allows to create a sort of symbolic link to the path, so it can be used without the full path.
     {
-        use c7_module_system::eat_at_restaurant;
+        use c07_module_system::eat_at_restaurant;
 
-        c7_module_system::eat_at_restaurant(); // Without the use keyword
+        c07_module_system::eat_at_restaurant(); // Without the use keyword
         eat_at_restaurant(); // With the use keyword
     }
     // Usually the parent is brought into scope, so, to call a from a child module, the parent module needs to be specified, making it clear that the function isn't local.
@@ -158,7 +158,7 @@ fn use_keyword() {
     // In this way the structure is mantained, but the public API is different.
     #[allow(dead_code)]
     {
-        pub use c7_module_system::front_of_house::hosting;
+        pub use c07_module_system::front_of_house::hosting;
 
         pub fn eat_at_restaurant() {
             hosting::add_to_waitlist();

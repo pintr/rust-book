@@ -1,5 +1,5 @@
 [package]
-name = "c1_hello_world"
+name = "c05_structs"
 version = "0.1.0"
 edition = "2021"
 

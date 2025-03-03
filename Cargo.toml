@@ -1,14 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
-    "c1_hello_world",
-    "c2_guessing_game",
-    "c3_common",
-    "c4_ownership",
-    "c5_structs",
-    "c6_enums",
-    "c7_module_system",
-    "c8_collections",
-    "c9_error_handling",
+    "c01_hello_world",
+    "c02_guessing_game",
+    "c03_common",
+    "c04_ownership",
+    "c05_structs",
+    "c06_enums",
+    "c07_module_system",
+    "c08_collections",
+    "c09_error_handling",
 ]
-default-members = ["c9_error_handling"]
+default-members = ["c09_error_handling"]

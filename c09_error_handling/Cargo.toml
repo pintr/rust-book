@@ -1,5 +1,5 @@
 [package]
-name = "c9_error_handling"
+name = "c09_error_handling"
 version = "0.1.0"
 edition = "2021"
 
