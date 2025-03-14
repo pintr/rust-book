@@ -67,7 +67,7 @@ fn move_interaction() {
         // When s2 is assigned to s1, the pointer, length, and capacity are copied, but not the data on the heap.
         // Both s1 and s2 point to the same memory location.
         // This means that, when s1 and s2 go out of scope, the drop function will free the same memory location twice.
-        // This error, called double free, is a memory safet bug, that can lead to security vulnerabilities.
+        // This error, called double free, is a memory safety bug, that can lead to security vulnerabilities.
         // Rust prevents this error by invalidating the first variable, s1, when the second variable, s2, is assigned.
 
         // println!("{s1}, world!"); // This doesn't work because s1 is invalidated

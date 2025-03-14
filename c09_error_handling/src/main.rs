@@ -4,7 +4,7 @@ use core::panic;
 /// There are two errors: recoverable and unrecoverable.
 /// Recoverable errors are those that can be handled and the program can continue. It uses the Result<T, E> enum.
 /// Unrecoverable errors are those that are not possible to handle and the program must be stopped. It uses the panic! macro.
-///
+
 
 fn main() {
     unrecoverable_errors();
@@ -32,7 +32,7 @@ fn unrecoverable_errors() {
 }
 
 fn recoverable_errors() {
-    //! Most error aren?t severe enough to require the program to stop entirely. In these cases, Rust has the Result enum
+    //! Most error aren't severe enough to require the program to stop entirely. In these cases, Rust has the Result enum
     // enum Result<T, E> {
     //     Ok(T),
     //     Err(E),

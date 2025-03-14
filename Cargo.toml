@@ -10,5 +10,6 @@ members = [
     "c07_module_system",
     "c08_collections",
     "c09_error_handling",
+    "c10_generics_traits_lifetimes",
 ]
-default-members = ["c09_error_handling"]
+default-members = ["c10_generics_traits_lifetimes"]
