@@ -168,11 +168,10 @@ fn use_keyword() {
     // Many external packages, called crates, can be found at crates.io.
     // The standard library std is a crate too, it doesn't need to be included in the Cargo.toml file, but it can be used with the use keyword.
     {
-        use rand::Rng;
         use std::collections::HashMap;
 
         let mut map = HashMap::new();
-        map.insert(1, rand::thread_rng().gen_range(1..100)); // Add a random number to the map with the key 1
+        map.insert(1, rand::random_range(1..100)); // Add a random number to the map with the key 1
     }
     // If there are multiple items from the same crate, they can be brought into scope with a single use keyword.
     // If two paths share one part which completes one of the two paths, the word `self` can be used to refer to the shared part.

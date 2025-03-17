@@ -11,11 +11,13 @@
 
 fn main() {
     generics();
+    traits();
 }
 
 fn generics() {
+    //! Generics create definitions for items like function signatures or structs, which we can then use with many different concrete data types.
     {
-        // Before diving into generics recurring operation can be extracted as a function
+        // Recurring operation can be extracted as a function
         // I.e. finding the largest number in a vector
         let numbers = vec![34, 50, 25, 100, 65];
 
@@ -51,6 +53,49 @@ fn generics() {
         println!("The largest number is {largest_number}");
         println!("The largest char is {largest_char}");
     }
+
+    fn largest_i32(numbers: &[i32]) -> &i32 {
+        //! Function for extracting the largest number in a list
+        let mut largest = &numbers[0];
+
+        for n in numbers {
+            if n > largest {
+                largest = n;
+            }
+        }
+
+        largest
+    }
+
+    fn largest_char(chars: &[char]) -> &char {
+        //! Function for extracting the largest char in a list
+        let mut largest = &chars[0];
+
+        for item in chars {
+            if item > largest {
+                largest = item;
+            }
+        }
+
+        largest
+    }
+
+    fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
+        //! Generic function for extracting the largest element in a list
+        let mut largest = &list[0];
+
+        for item in list {
+            // This control doesn't work because not all possible types allow the comparison.
+            // It is possible to restrict the types valid for T to only those taht implement the trait `PartialOrd`
+            // The `std::cmp::PartialOrd` trait that allows comparison
+            if item > largest {
+                largest = item;
+            }
+        }
+
+        largest
+    }
+
     {
         // Generics can be used to define structs too
         struct Point<T> {
@@ -146,44 +191,124 @@ fn generics() {
     }
 }
 
-fn largest_i32(numbers: &[i32]) -> &i32 {
-    //! Function for extracting the largest number in a list
-    let mut largest = &numbers[0];
+fn traits() {
+    //! A trait defines the functionality a particular type has and can share with other types.
+    //! Traits, similarly to interfaces, defines shared behaviour in an abstract way.
+    //! A type's behaviour consists of the methods defined for that type.
+    //! So different types share the same behaviour if they define the same methods
+    //! Trait definitions are a way to group method signature together to define a set of behaviours necessary to accomplish some purposes.
+    {
+        // Considering the Summary trait and Tweet in lib
+        use c10_generics_traits_lifetimes::{NewsArticle, Summary, Tweet};
 
-    for n in numbers {
-        if n > largest {
-            largest = n;
-        }
+        let tweet = Tweet {
+            username: String::from("horse123"),
+            content: String::from("of course, as you probably already know, people"),
+            reply: false,
+            retweet: false,
+        };
+
+        println!("1 new tweet:\n{}", tweet.summarise());
+
+        // Other crates that depend on this can bring the `Summary` trait into scope
+        // The traits can only be implemented if the trait, the type, or both are local to the crate.
+        // The standard library's `Display` trait could be implemented in `Tweet`
+        // `Summary` could be implemented in `Vec<T>` in this crate
+        // But external crate's component can't be aggregated
+        // So implemented `Display` to `Vec<T>` is not allowed. This is called coherence
+
+        let article = NewsArticle {
+            headline: String::from("Penguins win the Stanley Cup Championship!"),
+            location: String::from("Pittsburgh, PA, USA"),
+            author: String::from("Iceburgh"),
+            content: String::from(
+                "The Pittsburgh Penguins once again are the best \
+                 hockey team in the NHL.",
+            ),
+        };
+
+        // Test the default implementation fo summarise
+        println!("New article available! {}", article.summarise());
     }
+    {
+        // THe `impl` syntax can be used as a return value too
+        // This means that the function will return a value of a type that implements the trait
+        // The concrete type is not relevant
+        use c10_generics_traits_lifetimes::{Summary, Tweet};
 
-    largest
-}
-
-fn largest_char(chars: &[char]) -> &char {
-    //! Function for extracting the largest char in a list
-    let mut largest = &chars[0];
-
-    for item in chars {
-        if item > largest {
-            largest = item;
+        fn returns_summarisable() -> impl Summary {
+            Tweet {
+                username: String::from("horse123"),
+                content: String::from("of course, as you probably already know, people"),
+                reply: false,
+                retweet: false,
+            }
         }
+
+        println!(
+            "Here is the summaribable:\n{}",
+            returns_summarisable().summarise()
+        )
+        // In this case a `Tweet` is returned, could have been any other type that implements `Summary`
+        // The `impl Trait`, anyway, can be used only if a single type is return
+        // fn returns_summarizable(switch: bool) -> impl Summary {
+        //     if switch {
+        //         NewsArticle {
+        //             headline: String::from(
+        //                 "Penguins win the Stanley Cup Championship!",
+        //             ),
+        //             location: String::from("Pittsburgh, PA, USA"),
+        //             author: String::from("Iceburgh"),
+        //             content: String::from(
+        //                 "The Pittsburgh Penguins once again are the best \
+        //                  hockey team in the NHL.",
+        //             ),
+        //         }
+        //     } else {
+        //         Tweet {
+        //             username: String::from("horse_ebooks"),
+        //             content: String::from(
+        //                 "of course, as you probably already know, people",
+        //             ),
+        //             reply: false,
+        //             retweet: false,
+        //         }
+        //     }
+        // }
+        // The above function doesn't work because it could return either `NewsArticle` or `Tweet`
     }
+    {
+        // By using a trait bound with an impl block allows to use generic parameters with specifci methods
+        // For a single type it is possible to define methods available only to parameters with a specific trait
+        use std::fmt::Display;
 
-    largest
-}
-
-fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
-    //! Generic function for extracting the largest element in a list
-    let mut largest = &list[0];
-
-    for item in list {
-        // This control doesn't work because not all possible types allow the comparison.
-        // It is possible to restrict the types valid for T to only those taht implement the trait `PartialOrd`
-        // The `std::cmp::PartialOrd` trait that allows comparison
-        if item > largest {
-            largest = item;
+        struct _Pair<T> {
+            x: T,
+            y: T,
         }
-    }
 
-    largest
+        impl<T> _Pair<T> {
+            fn _new(x: T, y: T) -> Self {
+                Self { x, y }
+            }
+        }
+
+        impl<T: Display + PartialOrd> _Pair<T> {
+            // This method is available only to types that implement both DIsplay and PartialOrd
+            fn _cmp_display(&self) {
+                if self.x >= self.y {
+                    println!("The largest member is x = {}", self.x);
+                } else {
+                    println!("The largest member is y = {}", self.y);
+                }
+            }
+        }
+        // It's even possible to implement a trait for any type that implements another trait.
+        // Those are called blanket implementations
+        // The standard `ToString` is defined as follows:
+        // impl<T: Display> ToString for T {
+        // Since this is part of the standard library, the method `to_string` defined by the trait ToString is available to anyone that implements `Display`
+        let _s = 3.to_string();
+        // Traits and trait bounds allow to write code that uses generic type parameters to reduce duplication but also specify to the compiler that we want the generic type to have particular behavior.
+    }
 }
