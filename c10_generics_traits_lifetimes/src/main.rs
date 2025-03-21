@@ -12,6 +12,25 @@
 fn main() {
     generics();
     traits();
+    lifetimes();
+
+    // All together
+    use std::fmt::Display;
+
+    fn longest_with_an_announcement<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str
+    where
+        T: Display,
+    {
+        println!("Announcement! {ann}");
+        if x.len() > y.len() { x } else { y }
+    }
+
+    let string1 = "abcd";
+    let string2 = "xyz";
+    let ann = "Happy birthday!";
+
+    let longest = longest_with_an_announcement(string1, string2, ann);
+    println!("The longest string is: {}", longest)
 }
 
 fn generics() {
@@ -311,4 +330,169 @@ fn traits() {
         let _s = 3.to_string();
         // Traits and trait bounds allow to write code that uses generic type parameters to reduce duplication but also specify to the compiler that we want the generic type to have particular behavior.
     }
+}
+
+fn lifetimes() {
+    //! Lifetimes ensure that the references are valid as long as needed.
+    //! Every reference has a lifetime, which is the scope for which the reference is valid
+    //! Most lifetimes are implicit, they must be annotated when the lifetimes of references could be related in a few different ways
+    //! The aim of lifetimes is to prevent dangling references such as:
+    // {
+    //     let r;                // ---------+-- 'a
+    //                           //          |
+    //     {                     //          |
+    //         let x = 5;        // -+-- 'b  |
+    //         r = &x;           //  |       | Error: `x` does not live long enough
+    //     }                     // -+       |
+    //                           //          |
+    //     println!("r: {r}");   //          |
+    // }
+    // The lifetimes are expressed an apostrophe and a letter: `'a`, `'b`
+    // r is still valid, since it is declared in the scope with lifetime 'a, but its value is not ('b)
+    // The Rust compiler has a borrow checker that compares scopes to determine whether all borrows are valid
+    // If they are not the code won't compile
+    {
+        // Define two string of different legth
+        let string1 = String::from("abcd");
+        let string2 = "xyz";
+
+        // Get the longest one and print it
+        // The function takes two string slices, wich are references, so it does
+        let result = longest(string1.as_str(), string2);
+        println!("The longest string is {result}");
+
+        // Lifetime annotatios don't change how long any of the reference live.
+        // Rather, they describe the relationships of the lifetimes of multiple references to each other without affecting the lifetimes.
+        // Functions can accept references with any lifetime by specifying a generic lifetime parameter
+        // Here some examples of lifetime parameter
+        // &i32        // a reference
+        // &'a i32     // a reference with an explicit lifetime
+        // &'a mut i32 // a mutable reference with an explicit lifetime
+        // A single annotation isn't meaningful, since the lifetimes express the relation between multiple references.
+        // The lifetime of the reference returned by the longest function is the same as the smaller of the lifetimes of the values
+        // The following piece of code works because the result lifetime ends in the shortest scope, as well as string2
+        let string1 = String::from("long string is long");
+        {
+            let string2 = String::from("xyz");
+            let result = longest(string1.as_str(), string2.as_str());
+            println!("The longest string is {result}");
+        }
+        // The following won't, because the print command comes out of the shortest scope, when string2 is already expired
+        // For this reason result is expired too
+        // let string1 = String::from("long string is long");
+        // let result;
+        // {
+        //     let string2 = String::from("xyz");
+        //     result = longest(string1.as_str(), string2.as_str()); // Error: `string2` does not live long enough
+        // }
+        // println!("The longest string is {result}");
+        // Looking at it string1 is loger compared to string2 anyway, but the compiler can't see it
+    }
+    {
+        let novel = String::from("Call me Ishmael. Some years ago...");
+        let first_sentence = novel.split('.').next().unwrap();
+        let i = ImportantExcerpt {
+            part: first_sentence,
+        };
+        println!("Part: {}", i.part)
+        // In this case the struct has a field `part` that holds a string slice, which is a reference
+        // Defining the lifetime, similarly to generics, means that the instance of teh struct can't outlive the reference it holds.
+        // in this case `novel` doesn't go out of scope before `i` is used, so it is valid
+    }
+    {
+        // There are functions where parameters and return type are references but don't need a lifetime association:
+        fn first_word(s: &str) -> &str {
+            let bytes = s.as_bytes();
+
+            for (i, &item) in bytes.iter().enumerate() {
+                if item == b' ' {
+                    return &s[0..i];
+                }
+            }
+
+            &s[..]
+        }
+        let novel = String::from("Call me Ishmael. Some years ago...");
+        println!("First word: {}", first_word(&novel))
+        // The `first_word` function would have needed a lifetime: `first_word<'a>(s: &'a str) -> &'a str`
+        // But in early versions of Rust the creators found that they were entering the same lifetime annotations over and over is some cases
+        // These situations were predictable and followed deterministic patterns, so they added into the compiler's code
+        // More deterministc patterns are found, less lifetime annotations will be required
+        // These situations are called lifetime elision rules
+        // The rules aren't for the programmer to follow, but they won't require a lifetime association when encountered
+        // Considering the lifetime of parameters as input lifetimes, and those on return values output lifetimes
+        // The compiler uses three rules (first on input, last two on output) to figure out the lifetimes of the references, so they don't require the annotation:
+        // Rule 1: the compiler assigns a lifetime parameter to each parameter that's a reference
+        //         the lifetimes are different for each parameter such as:
+        //         For one: `fn foo<'a>(x: &'a i32);`, for two: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);`, and so on.
+        // Rule 2: if there is an explicit input lifetime parameter, it will be assigned to all the outputs: `fn foo<'a>(x: &'a i32) -> &'a i32`.
+        // Rule 3: If there are multiple input parameters, but one is `&self` or `&mut self`, the lifetime of `self` is assigned to every output.
+        // In the case of `first_word` teh signature is `fn first_word(s: &str) -> &str`
+        // The the compiler applies the first rule: `fn first_word<'a>(s:&'a str) -> &str`
+        // Then the second: fn first_word<'a>(s:&'a str) -> &'a str
+        // now all references have lifetime and compiler can move on
+        // Considering longest, instead, the signature is: `fn longest(x: &str, y: &str) -> &str`
+        // The first ruel applies: `fn longest<'a, 'b>(x: &'a str, y: &'b str) -> &str`
+        // The second rule can't apply because there are more then one input lifetime parameters
+    }
+    {
+        // The third rule only applies on method signatures
+        // When implementig a method on a struct with lifetimes, declaration and use of lifetimes depend on whether they are related to struct field, or method parameters and return values
+        // Lifetime names for struct fields  always need to be declared after `impl` and after the struct name, because it's part of the struct's type
+        // In method signature inside impl, references might be tied to the lifetime of the fields, or may be independent
+        // For the lifetime elision rules often it's not required to put  a lifetime association on method signatures, because they use `self`
+        impl<'a> ImportantExcerpt<'a> {
+            fn _level(&self) -> i32 {
+                3
+            }
+            fn _announce_and_return_part(&self, announcement: &str) -> &str {
+                // In this case the third rule applies, the return value has the same lifetime as `self`
+                println!("Attention please: {announcement}");
+                self.part
+            }
+        }
+    }
+    {
+        // There is a special lifetime called `'static`, which denotes that the affected reference can live for the entire duration of the program
+        // All literals have `'static` lifetime: `let s: &'static str = "I have a static lifetime.";`
+        // This is because the string is stored in the binary code of the program
+        // Before using `'static` it is required to think if a variable will actually live for the whole program
+    }
+
+    // fn longest(x: &str, y: &str) -> &str {
+    //     //! Function that returns the longer of two string slices
+    //     // The function takes two string slices, wich are references, so it doesn't take ownership of the parameters
+    //     // This function won't compile because it doesn't know whether `x` or `y` borrowed values are returned
+    //     // In this case the concrete values passed into the function are unknown, so the case (if/else) is unknown too
+    //     // For this reason the borrow checker can't determine the lifetime of the relation between `x` and `y`, and the returned value
+    //     // To fix this the funciton requires a generic lifetime parameter that define the relationship between the references
+    //     if x.len() > y.len() { x } else { y }
+    // }
+
+    // Structs can hold references
+    // In this case they need to add a lifetime annotation on every reference in the struct's definition:
+    struct ImportantExcerpt<'a> {
+        part: &'a str,
+    }
+
+    fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+        //! Function that returns the longer of two string slices using a lifetime `'a`
+        // For functions, the lifetime is expressed inside angle brackets.
+        // This signature expresses the contraint that the value will be valid as long as both parameters are valid
+        // The generic lifetime `'a` will get the concrete lifetime that is equal to the smaller of the lifetimes of `x` and `y`
+        if x.len() > y.len() { x } else { y }
+    }
+    // If this function only returned the first parameter, it would not be necessary to specify the lifetime on the second parameter:
+    fn _longest<'a>(x: &'a str, _y: &str) -> &'a str {
+        x
+    }
+
+    // When returning a reference from a function, the lifetime parameter for the return type needs to match the lifetime parameter for one of the parameters
+    // If it doesn't the value is created in the function, generating a dangling reference:
+    // fn __longest<'a>(x: &str, y: &str) -> &'a str {
+    //     let result = String::from("really long string");
+    //     result.as_str() // Error: returns a value referencing data owned by the current function
+    // }
+    // Result goes out of scope at the end of the function call
+    // To fix this the function should return an owned data type rather than a reference
 }

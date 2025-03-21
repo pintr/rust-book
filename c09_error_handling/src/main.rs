@@ -5,7 +5,6 @@ use core::panic;
 /// Recoverable errors are those that can be handled and the program can continue. It uses the Result<T, E> enum.
 /// Unrecoverable errors are those that are not possible to handle and the program must be stopped. It uses the panic! macro.
 
-
 fn main() {
     unrecoverable_errors();
     recoverable_errors();
