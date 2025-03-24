@@ -63,7 +63,7 @@ fn ip_addr_kind() {
 }
 
 fn message() {
-    //! Message is an enum with four variants: Quit, Move, Write, and ChangeColor.
+    // Message is an enum with four variants: Quit, Move, Write, and ChangeColor.
     // Quit has no data associated with it at all.
     // Move includes an anonymous struct inside it.
     // Write includes a single String.
@@ -96,7 +96,7 @@ fn message() {
 }
 
 fn option() {
-    //! The Option enum is defined by the standard library and is used when absence is a possibility.
+    // The Option enum is defined by the standard library and is used when absence is a possibility.
     // A value of Option<T> can either be Some(T) or None.
     // For example  requesting the first item of a list depends if it's empy or not
     // Rust doesn't have nulls, because is a value that means absence of a value, so a variable can be null or not null.
@@ -125,7 +125,7 @@ fn option() {
 
 #[allow(dead_code)]
 fn match_control() {
-    //! The match control flow operator is used to compare a value against a series of patterns and then execute code based on which pattern matches.
+    // The match control flow operator is used to compare a value against a series of patterns and then execute code based on which pattern matches.
     // The match operator is similar to a switch statement in other languages.
     // The match expression acts like a coin sorting machine where the coin falls in the first matching slot.
     // Match is composed by arms separated by a comma, each arm has a pattern and the code to run if the value matches the pattern, separated by =>.
@@ -248,7 +248,7 @@ fn match_control() {
 }
 
 fn if_let() {
-    //! if let is a construct that allows to match a single pattern, and ignore the rest.
+    // if let is a construct that allows to match a single pattern, and ignore the rest.
     // It is useful when we are interested in only one pattern, and we don't want to list all the possible patterns.
     let config_max = Some(3u8);
     match config_max {

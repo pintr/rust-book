@@ -16,8 +16,8 @@ fn main() {
 }
 
 fn packages_crates() {
-    //! A crate is a binary or library. The crate root is a source file that the Rust compiler starts from and makes up the root module of your crate.
-    //! A package is one or more crates that provide a set of functionality. A package contains a Cargo.toml file that describes how to build those crates.
+    // A crate is a binary or library. The crate root is a source file that the Rust compiler starts from and makes up the root module of your crate.
+    // A package is one or more crates that provide a set of functionality. A package contains a Cargo.toml file that describes how to build those crates.
 
     // A crate is the smallest amount of code that the Rucompiler considers at a time.
     // Even when using rustc instead of cargo the compiler considers that only file a crate.
@@ -36,7 +36,7 @@ fn packages_crates() {
 }
 
 fn modules() {
-    //! Modules are a way to organize code within a crate for readability, reuse, and privacy of items.
+    // Modules are a way to organize code within a crate for readability, reuse, and privacy of items.
 
     // In order to work with modules it is important to understand the use of paths, use and pub keywords, how they work in the compiler, and how the code is organized:
     // Crate root: The compiler at first looks for the crate root to compile: src/main.rs for binaries, src/lib.rs for libraries.
@@ -81,7 +81,7 @@ fn modules() {
 }
 
 fn paths() {
-    //! To show rust where to find an item in a module tree a path is used, the same way a file system uses paths to find files.
+    // To show rust where to find an item in a module tree a path is used, the same way a file system uses paths to find files.
     // A path can be absoluteor relative:
     // - Absolute: Full path starting from a crate root by using a crate name or a literal crate.
     // - Relative: Starts from the current module and uses self, super, or an identifier in the current module.
@@ -115,7 +115,7 @@ fn paths() {
 }
 
 fn use_keyword() {
-    //! The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
+    // The use keyword brings a path into scope, allowing it to be referenced with a shorter name.
     // The use keyword allows to create a sort of symbolic link to the path, so it can be used without the full path.
     {
         use c07_module_system::eat_at_restaurant;
@@ -194,7 +194,7 @@ fn use_keyword() {
 }
 
 fn split_modules() {
-    //! In order to make the code easier to navigate, it may be useful to split the code into multiple files.
+    // In order to make the code easier to navigate, it may be useful to split the code into multiple files.
     // For example we may want to separate the front_of_house module from the lib.rs file.
     // Additionally the hosting module can be extrated from the front_of_house module into its own file.
     // In this case the front_of_house module is defined in src/front_of_house.rs and the hosting module is defined in src/front_of_house/hosting.rs.

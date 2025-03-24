@@ -19,7 +19,7 @@ fn main() {
 }
 
 fn ownership() {
-    //! Ownership basics in Rust
+    // Ownership basics in Rust
     {
         // s not valid here, not yet declared
         let _s = "hello"; // s is a string literal, which is immutable and fixed in size.
@@ -47,7 +47,7 @@ fn ownership() {
 }
 
 fn move_interaction() {
-    //! The ownership of a value is transferred to a new variable.
+    // The ownership of a value is transferred to a new variable.
     {
         // In this example there is a copy of the value x to y, both are 5
         let x = 5;
@@ -77,7 +77,7 @@ fn move_interaction() {
 }
 
 fn assign_interaction() {
-    //! When a new value is assigned is assigned to an existing variable, Rust drops the original value's memory immediately.
+    // When a new value is assigned is assigned to an existing variable, Rust drops the original value's memory immediately.
     let mut s = String::from("hello");
     println!("{s}, world!");
     s = String::from("aohy");
@@ -86,8 +86,8 @@ fn assign_interaction() {
 }
 
 fn clone_interaction() {
-    //! To make a deep copy of the heap data, the clone method can be used.
-    //! This method is used to copy the heap data, and not just the stack data.
+    // To make a deep copy of the heap data, the clone method can be used.
+    // This method is used to copy the heap data, and not just the stack data.
     let s1 = String::from("hello");
     let s2 = s1.clone();
 
@@ -100,7 +100,7 @@ fn clone_interaction() {
 }
 
 fn ownership_and_functions() {
-    //! Passing a variable to a function will move or copy, depending on the type.
+    // Passing a variable to a function will move or copy, depending on the type.
     let s = String::from("hello"); // s comes into scope
     takes_ownership(s); // s's value moves into the function and so is no longer valid here
 
@@ -122,7 +122,7 @@ fn ownership_and_functions() {
 }
 
 fn return_scope() {
-    //! Returning values from functions can also transfer ownership.
+    // Returning values from functions can also transfer ownership.
     let _s1 = gives_ownership(); // gives_ownership moves its return value into s1
     let s2 = String::from("hello"); // s2 comes into scope
     let _s3 = takes_and_gives_back(s2); // s2 is moved into takes_and_gives_back, which also moves its return value into s3
@@ -143,7 +143,7 @@ fn return_scope() {
 }
 
 fn references_borrowing() {
-    //! References allow to refer to a value without taking ownership of it.
+    // References allow to refer to a value without taking ownership of it.
     // A reference behaves like a pointer, so it's an address that can be followed to access data stored at that address.
     // A reference is guaranteed to point to a valid value of a particular type for the life of the reference.
     // When a reference is used there is no need to return the value because the function never had ownership.
@@ -222,15 +222,15 @@ fn references_borrowing() {
     }
 
     fn change_mut(s: &mut String) {
-        //! To allow modifying the reference, the reference must be mutable
+        // To allow modifying the reference, the reference must be mutable
         s.push_str(", world!");
     }
 }
 
 #[allow(unused_variables)]
 fn dangling_references() {
-    //! Languages with pointers allow to create dangling pointers, which are pointers that reference a location in memory that may have been given to someone else.
-    //! Rust prevents this by enforcing the rules of ownership.
+    // Languages with pointers allow to create dangling pointers, which are pointers that reference a location in memory that may have been given to someone else.
+    // Rust prevents this by enforcing the rules of ownership.
     // The compiler ensures that data won't go out of scope before the reference to the data does.
     // let reference = dangle();
     let reference = no_dangle();
@@ -248,7 +248,7 @@ fn dangling_references() {
 }
 
 fn slices() {
-    //! A function that returns the first word of a string
+    // A function that returns the first word of a string
     let mut s = String::from("hello world");
     let _word = first_word(&s);
     s.clear(); // This empties the String, making it equal to ""
@@ -277,8 +277,8 @@ fn slices() {
     // fn first_word(s: &String) -> &str {
     fn first_word(s: &str) -> &str {
         // Improved version of the function that allows to pass a string slice
-        //! The function takes a string reference and returns the index of the first space in the string.
-        //! The function returns the length of the first word.
+        // The function takes a string reference and returns the index of the first space in the string.
+        // The function returns the length of the first word.
         let bytes = s.as_bytes(); // Convert the string to an array of bytes to check element by element
         for (i, &item) in bytes.iter().enumerate() {
             // Create an iterator over the array of bytes, and enumerate it to get the index and the value
@@ -291,8 +291,8 @@ fn slices() {
     }
 
     fn string_slice() {
-        //! String slices are references to a part of a String.
-        //! They have the type &str, which is a reference to a string slice.
+        // String slices are references to a part of a String.
+        // They have the type &str, which is a reference to a string slice.
         let s = String::from("hello world");
         let len = s.len();
         let _hello = &s[0..5]; // The first five characters of the string

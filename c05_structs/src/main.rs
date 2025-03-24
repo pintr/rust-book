@@ -35,7 +35,7 @@ fn main() {
 }
 
 fn user_instances() {
-    //! Function to create different instances of the User struct
+    // Function to create different instances of the User struct
     let user1 = User {
         // Basic way to create an instance of a struct, the order of the fields doesn't matter.
         active: true,
@@ -75,7 +75,7 @@ fn user_instances() {
 }
 
 fn build_user(email: String, username: String) -> User {
-    //! Function to create a User instance
+    // Function to create a User instance
     // User {
     //     // Init with the long form, having to specify twice the name of the field is a bit tedious.
     //     email: email,
@@ -94,7 +94,7 @@ fn build_user(email: String, username: String) -> User {
 }
 
 fn tuple_structs() {
-    //! Function to show the use of tuple structs
+    // Function to show the use of tuple structs
     let black = Color(0, 0, 0); // We can create an instance of a tuple struct like a tuple.
     let origin = Point(0, 0, 0);
     // In this case balck and origin have the same values but are instances of two different types.
@@ -105,14 +105,14 @@ fn tuple_structs() {
 }
 
 fn unit_struct() {
-    //! Function to show the use of unit-like structs
+    // Function to show the use of unit-like structs
     let _unit = Unit; // We can create an instance of a unit-like struct.
 
     // We can use unit-like structs to implement traits on types that don't have any data.
 }
 
 fn rectangle() {
-    //! Calculate the area of a rectangle in different ways
+    // Calculate the area of a rectangle in different ways
 
     {
         // Using variables
@@ -165,7 +165,7 @@ fn rectangle() {
         // println!("rect is {rect:?}"); // The specifier :? is used to print the debug representation of a value.
         // We can't print the struct because it doesn't implement the Display trait, present in primitive types, and the trait Debug neither.
         // The Display trait is not implemented by default for structs because the way to display a struct depends on the specific use case.
-        // The Debug trait can be added using hte attribute `#[derive(Debug)]` to the struct definition.
+        // The Debug trait can be added using the attribute `#[derive(Debug)]` to the struct definition.
     }
     #[allow(dead_code)]
     {
@@ -195,8 +195,8 @@ fn rectangle() {
 }
 
 fn method_syntax() {
-    //! Methods are similar to functions, but are defined within the context of a struct (or enum or trait object).
-    //! They are called on an instance of the struct and can access and modify the data of the struct.
+    // Methods are similar to functions, but are defined within the context of a struct (or enum or trait object).
+    // They are called on an instance of the struct and can access and modify the data of the struct.
     // Define a struct for the rectangle
     #[derive(Debug)]
     struct Rectangle {

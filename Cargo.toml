@@ -11,5 +11,6 @@ members = [
     "c08_collections",
     "c09_error_handling",
     "c10_generics_traits_lifetimes",
+    "c11_automated_tests",
 ]
-default-members = ["c10_generics_traits_lifetimes"]
+default-members = ["c11_automated_tests"]

@@ -16,7 +16,7 @@ fn main() {
 }
 
 fn mutability() {
-    //! Demonstrates variable mutability in Rust.
+    // Demonstrates variable mutability in Rust.
     // This function creates a mutable variable `x`, prints its initial value,
     // modifies the value of `x`, and then prints the updated value.
 
@@ -28,7 +28,7 @@ fn mutability() {
 }
 
 fn shadow() {
-    //! Demonstrates variable shadowing in Rust.
+    // Demonstrates variable shadowing in Rust.
     // This function creates a variable `x`, shadows it with a new value,
     // and then shadows it again within an inner scope. It prints the value
     // of `x` at different points to show how shadowing works. Additionally,
@@ -52,7 +52,7 @@ fn shadow() {
 }
 
 fn operations() {
-    //! Demonstrates basic operations in Rust.
+    // Demonstrates basic operations in Rust.
 
     let _sum = 5 + 10;
     let _difference = 95.5 - 4.3;
@@ -64,7 +64,7 @@ fn operations() {
 }
 
 fn chars() {
-    //! Demonstrates character types in Rust.
+    // Demonstrates character types in Rust.
 
     let _c = 'z';
     let _z = 'ℤ';
@@ -72,7 +72,7 @@ fn chars() {
 }
 
 fn tuples() {
-    //! Demonstrates tuples in Rust.
+    // Demonstrates tuples in Rust.
 
     let _tup: (i32, f64, u8) = (500, 6.4, 1);
     let (_x, _y, _z) = _tup;
@@ -86,7 +86,7 @@ fn tuples() {
 }
 
 fn arrays() {
-    //! Demonstrates arrays in Rust.
+    // Demonstrates arrays in Rust.
 
     let _a = [1, 2, 3, 4, 5];
     let _b = [2; 5];

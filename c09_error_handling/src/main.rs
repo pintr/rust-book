@@ -12,8 +12,8 @@ fn main() {
 }
 
 fn unrecoverable_errors() {
-    //! Unrecoverable errors are characterized by the panic! macro.
-    //! The panic can be caused by the code, or by explicit call to the panic! macro.
+    // Unrecoverable errors are characterized by the panic! macro.
+    // The panic can be caused by the code, or by explicit call to the panic! macro.
     // When a panic occurs, Rust by default unwinds (walks back) the stack, cleans up the memory, and then exits.
     // Another possibility is to abort without unwinding the stack, which is faster, but the memory is not cleaned up. This will be done by the OS.
     // To switch to abort `panic = 'abort'` must be added to the profile in the [profile] section of the Cargo.toml file.
@@ -31,7 +31,7 @@ fn unrecoverable_errors() {
 }
 
 fn recoverable_errors() {
-    //! Most error aren't severe enough to require the program to stop entirely. In these cases, Rust has the Result enum
+    // Most error aren't severe enough to require the program to stop entirely. In these cases, Rust has the Result enum
     // enum Result<T, E> {
     //     Ok(T),
     //     Err(E),
@@ -177,7 +177,7 @@ fn recoverable_errors() {
 }
 
 fn when_panic() {
-    //! Guidelines to define when to use `panic!` and `Result`
+    // Guidelines to define when to use `panic!` and `Result`
     // Both can be used in any case, but id doesn't make sense.
     // The basic idea is that panic stops completely the execution, while Result leaves the coiche to the calling code, that, in case of Err can panic.
     // In general, knowing that a function might fail, Result is a good choice.

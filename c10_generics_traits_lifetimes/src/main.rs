@@ -34,7 +34,7 @@ fn main() {
 }
 
 fn generics() {
-    //! Generics create definitions for items like function signatures or structs, which we can then use with many different concrete data types.
+    // Generics create definitions for items like function signatures or structs, which we can then use with many different concrete data types.
     {
         // Recurring operation can be extracted as a function
         // I.e. finding the largest number in a vector
@@ -74,7 +74,7 @@ fn generics() {
     }
 
     fn largest_i32(numbers: &[i32]) -> &i32 {
-        //! Function for extracting the largest number in a list
+        // Function for extracting the largest number in a list
         let mut largest = &numbers[0];
 
         for n in numbers {
@@ -87,7 +87,7 @@ fn generics() {
     }
 
     fn largest_char(chars: &[char]) -> &char {
-        //! Function for extracting the largest char in a list
+        // Function for extracting the largest char in a list
         let mut largest = &chars[0];
 
         for item in chars {
@@ -100,7 +100,7 @@ fn generics() {
     }
 
     fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T {
-        //! Generic function for extracting the largest element in a list
+        // Generic function for extracting the largest element in a list
         let mut largest = &list[0];
 
         for item in list {
@@ -211,11 +211,11 @@ fn generics() {
 }
 
 fn traits() {
-    //! A trait defines the functionality a particular type has and can share with other types.
-    //! Traits, similarly to interfaces, defines shared behaviour in an abstract way.
-    //! A type's behaviour consists of the methods defined for that type.
-    //! So different types share the same behaviour if they define the same methods
-    //! Trait definitions are a way to group method signature together to define a set of behaviours necessary to accomplish some purposes.
+    // A trait defines the functionality a particular type has and can share with other types.
+    // Traits, similarly to interfaces, defines shared behaviour in an abstract way.
+    // A type's behaviour consists of the methods defined for that type.
+    // So different types share the same behaviour if they define the same methods
+    // Trait definitions are a way to group method signature together to define a set of behaviours necessary to accomplish some purposes.
     {
         // Considering the Summary trait and Tweet in lib
         use c10_generics_traits_lifetimes::{NewsArticle, Summary, Tweet};
@@ -333,10 +333,10 @@ fn traits() {
 }
 
 fn lifetimes() {
-    //! Lifetimes ensure that the references are valid as long as needed.
-    //! Every reference has a lifetime, which is the scope for which the reference is valid
-    //! Most lifetimes are implicit, they must be annotated when the lifetimes of references could be related in a few different ways
-    //! The aim of lifetimes is to prevent dangling references such as:
+    // Lifetimes ensure that the references are valid as long as needed.
+    // Every reference has a lifetime, which is the scope for which the reference is valid
+    // Most lifetimes are implicit, they must be annotated when the lifetimes of references could be related in a few different ways
+    // The aim of lifetimes is to prevent dangling references such as:
     // {
     //     let r;                // ---------+-- 'a
     //                           //          |
@@ -460,7 +460,7 @@ fn lifetimes() {
     }
 
     // fn longest(x: &str, y: &str) -> &str {
-    //     //! Function that returns the longer of two string slices
+    //     // Function that returns the longer of two string slices
     //     // The function takes two string slices, wich are references, so it doesn't take ownership of the parameters
     //     // This function won't compile because it doesn't know whether `x` or `y` borrowed values are returned
     //     // In this case the concrete values passed into the function are unknown, so the case (if/else) is unknown too
@@ -476,7 +476,7 @@ fn lifetimes() {
     }
 
     fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
-        //! Function that returns the longer of two string slices using a lifetime `'a`
+        // Function that returns the longer of two string slices using a lifetime `'a`
         // For functions, the lifetime is expressed inside angle brackets.
         // This signature expresses the contraint that the value will be valid as long as both parameters are valid
         // The generic lifetime `'a` will get the concrete lifetime that is equal to the smaller of the lifetimes of `x` and `y`

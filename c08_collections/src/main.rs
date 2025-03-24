@@ -10,7 +10,7 @@ fn main() {
 }
 
 fn vectors() {
-    //! Vectors are similar to arrays, but they can grow or shrink in size.
+    // Vectors are similar to arrays, but they can grow or shrink in size.
     // Vectos can only store elements of the same type.
     // Create empty vector, since it's empty the type annotation is required.
     let _v: Vec<i32> = Vec::new();
@@ -90,7 +90,7 @@ fn vectors() {
 }
 
 fn strings() {
-    //! In Rust strings are a collection of bytes, with methods to provide additional functionalities.
+    // In Rust strings are a collection of bytes, with methods to provide additional functionalities.
     // Rust has two types of strings: `String` and `&str`.
     // The string slice `str`, `&str` in borrowed form, is a UTF-8 encoded string data stored in the binary.
     // The `String` type is a growable, mutable, owned, UTF-8 encoded string data type stored in the heap.
@@ -156,7 +156,7 @@ fn strings() {
 }
 
 fn hash_maps() {
-    //! `HashMap<K, V>` is a collection of keys and values, where each key is unique.
+    // `HashMap<K, V>` is a collection of keys and values, where each key is unique.
     // The mapping of keys of type `K` to values of type `V` is done via an hashing function that determines how it places the keys and values in memory.
     // Hash maps are useful when data needs to be accessed using a key instead of an index.
     // To create an empty hash map, the HashMap must be brought into scope because it is not in the prelude.
