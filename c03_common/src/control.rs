@@ -1,4 +1,4 @@
-/// Control flow in Rust
+//! Control flow in Rust
 
 pub(crate) fn main() {
     if_else(2);

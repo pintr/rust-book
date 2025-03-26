@@ -1,4 +1,4 @@
-/// System module examples
+//! System module examples
 
 // The following module has been migrated to the front_of_house module
 // #[allow(dead_code)]

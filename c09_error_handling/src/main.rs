@@ -1,9 +1,9 @@
-use core::panic;
+//! Rust has many features for error handling, additionally it requires to aknowledge the possibility of errors, so it requires to handle them.
+//! There are two errors: recoverable and unrecoverable.
+//! Recoverable errors are those that can be handled and the program can continue. It uses the Result<T, E> enum.
+//! Unrecoverable errors are those that are not possible to handle and the program must be stopped. It uses the panic! macro.
 
-/// Rust has many features for error handling, additionally it requires to aknowledge the possibility of errors, so it requires to handle them.
-/// There are two errors: recoverable and unrecoverable.
-/// Recoverable errors are those that can be handled and the program can continue. It uses the Result<T, E> enum.
-/// Unrecoverable errors are those that are not possible to handle and the program must be stopped. It uses the panic! macro.
+use core::panic;
 
 fn main() {
     unrecoverable_errors();

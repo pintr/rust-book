@@ -1,7 +1,7 @@
+//! Commmon programming concepts in Rust.
+
 mod control;
 mod functions;
-
-/// Commmon programming concepts in Rust.
 
 fn main() {
     mutability();

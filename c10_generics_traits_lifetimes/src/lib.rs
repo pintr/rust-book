@@ -1,8 +1,8 @@
-/// Summary
-/// There are multiple structs that hold various kind and amount of text
-/// I.e. `NewsArticle`, `Tweet`, ...
-/// The purpose is creating a media aggregator library that displays a summary of data contained in the structs
-/// To do this, they need to implement a trait `Summary` that defines a `summarise` method on an instance
+//! Summary
+//! There are multiple structs that hold various kind and amount of text
+//! I.e. `NewsArticle`, `Tweet`, ...
+//! The purpose is creating a media aggregator library that displays a summary of data contained in the structs
+//! To do this, they need to implement a trait `Summary` that defines a `summarise` method on an instance
 
 // This is the definition of the Summary public trait using the `trait` keyword
 pub trait Summary {

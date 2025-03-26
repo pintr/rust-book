@@ -1,4 +1,4 @@
-/// Functions in Rust.
+//! Functions in Rust.
 
 pub(crate) fn main() {
     another_function(2);

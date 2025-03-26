@@ -1,7 +1,7 @@
-/// Use of structs in Rust
-/// A struct is a custom data type that lets you name and package together multiple related values that make up a meaningful group.
-/// Structs are similar to tuples but in structs each piece of data has a name.
-/// A struct can be  defined, instantiated, and have associated functions called methods.
+//! Use of structs in Rust
+//! A struct is a custom data type that lets you name and package together multiple related values that make up a meaningful group.
+//! Structs are similar to tuples but in structs each piece of data has a name.
+//! A struct can be  defined, instantiated, and have associated functions called methods.
 
 struct User {
     // Example of a struct definition, having the names we don't rely only on the position like in tuples.

@@ -1,10 +1,10 @@
-/// Brief summary of stack and heap memory management:
-/// The stack stores values in a last-in, first-out order and is faster for known, fixed-size data.
-/// The heap handles dynamically sized data by allocating memory and returning pointers.
-/// Stack operations are simpler and faster, but heap allocation involves more overhead due to finding and managing free space.
-/// Ownership in Rust is designed to manage heap data effectively, minimizing duplicates and cleaning up unused data, ensuring efficient memory use.
-/// Each value in Rust has a variable that is its owner, and there can only be one owner at a time.
-/// When the owner goes out of scope, the value is dropped, freeing the memory.
+//! Brief summary of stack and heap memory management:
+//! The stack stores values in a last-in, first-out order and is faster for known, fixed-size data.
+//! The heap handles dynamically sized data by allocating memory and returning pointers.
+//! Stack operations are simpler and faster, but heap allocation involves more overhead due to finding and managing free space.
+//! Ownership in Rust is designed to manage heap data effectively, minimizing duplicates and cleaning up unused data, ensuring efficient memory use.
+//! Each value in Rust has a variable that is its owner, and there can only be one owner at a time.
+//! When the owner goes out of scope, the value is dropped, freeing the memory.
 
 fn main() {
     ownership();

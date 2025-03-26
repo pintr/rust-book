@@ -1,13 +1,13 @@
-/// Rust provides tools for handling duplication of concepts: generics, traits, and lifetimes.
-/// Generics abstract stand-ins for concrete types and properties.
-/// They allow to express the behaviour without knowing  what wil be in their place in compile time.
-/// Generics are used for `Option<T>`, `Vec<T>`, `HashMap<K, V>`, Result<T,E>, but custom ones can be defined
-/// There are types of functions called generic functions that allow to reduce code duplication by abstarcting the input types
-/// They can be used in struct and enum too.
-/// Traits are used to define behaviour in a generic way.
-/// They can be used to  constrain a generic to accept only types with that behaviour.
-/// Lifetimes are generics that give the compiler information about how references relate to each other.
-/// This allow the compiler to ensure the borrowed values are valid
+//! Rust provides tools for handling duplication of concepts: generics, traits, and lifetimes.
+//! Generics abstract stand-ins for concrete types and properties.
+//! They allow to express the behaviour without knowing  what wil be in their place in compile time.
+//! Generics are used for `Option<T>`, `Vec<T>`, `HashMap<K, V>`, Result<T,E>, but custom ones can be defined
+//! There are types of functions called generic functions that allow to reduce code duplication by abstarcting the input types
+//! They can be used in struct and enum too.
+//! Traits are used to define behaviour in a generic way.
+//! They can be used to  constrain a generic to accept only types with that behaviour.
+//! Lifetimes are generics that give the compiler information about how references relate to each other.
+//! This allow the compiler to ensure the borrowed values are valid
 
 fn main() {
     generics();

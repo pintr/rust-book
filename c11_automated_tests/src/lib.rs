@@ -1,26 +1,26 @@
-/// Correctness in our programs is the extent to which our code does what we intend it to do.
-/// Rust is designed with a high degree of concern about the correctness of programs
-/// Rust includes support for writing automated software tests.
-/// Tests are Rust function that very that the non test code is working as expected
-/// They are performed in three actions:
-/// 1. Set up data or state
-/// 2. Run the code to be tested
-/// 3. Assert that the results are what is expected
-/// A test is a function annotated with the `test` attribute: `#[test]`
-/// Tests are executed by running `cargo test`, which generates a report
-/// There is a statistic `measured` for benchmark tests currently available in nightly Rust
-/// Each test is run in parallel in a new thread, and when the main thread sees that a test thread has died, the test is marked as failed.
-/// To prevent tests running in parallel it is possible to use the `--test-threads` and set to 1 for a single thread
-/// It is possible to see the values for passing tests, instead of just failing, by adding `-- --show-output`
-/// Rust allows to run only one specific test by specifying it `cargo test larger_can_hold_smaller`
-/// It is also possible to filter tests by specifying a substring, for example `cargo test larger` will run all the tests that has `larger` in the name
-/// I Rust there are two main categories of tests:
-/// - Unit tests: small and focused on one module at time, can test private interfaces.
-/// - Integration tests: external to the library, and uses the library code as any other library, so using the public elements. Tey are in a separated `tests` folder
-/// This module only contains unit tests, as they isolate units of code from the rest, and allows to analyse its behaviour
-/// The convention is to create a module named `tests` in each file to ccontain the test functions, and annotate the module with `#[cfg(test)]
-/// This annotation tells Rust to run that code only when `cargo test` is called, and not `cargo build`
-/// They allow to test both public and private functions
+//! Correctness in our programs is the extent to which our code does what we intend it to do.
+//! Rust is designed with a high degree of concern about the correctness of programs
+//! Rust includes support for writing automated software tests.
+//! Tests are Rust function that very that the non test code is working as expected
+//! They are performed in three actions:
+//! 1. Set up data or state
+//! 2. Run the code to be tested
+//! 3. Assert that the results are what is expected
+//! A test is a function annotated with the `test` attribute: `#[test]`
+//! Tests are executed by running `cargo test`, which generates a report
+//! There is a statistic `measured` for benchmark tests currently available in nightly Rust
+//! Each test is run in parallel in a new thread, and when the main thread sees that a test thread has died, the test is marked as failed.
+//! To prevent tests running in parallel it is possible to use the `--test-threads` and set to 1 for a single thread
+//! It is possible to see the values for passing tests, instead of just failing, by adding `-- --show-output`
+//! Rust allows to run only one specific test by specifying it `cargo test larger_can_hold_smaller`
+//! It is also possible to filter tests by specifying a substring, for example `cargo test larger` will run all the tests that has `larger` in the name
+//! I Rust there are two main categories of tests:
+//! - Unit tests: small and focused on one module at time, can test private interfaces.
+//! - Integration tests: external to the library, and uses the library code as any other library, so using the public elements. Tey are in a separated `tests` folder
+//! This module only contains unit tests, as they isolate units of code from the rest, and allows to analyse its behaviour
+//! The convention is to create a module named `tests` in each file to ccontain the test functions, and annotate the module with `#[cfg(test)]
+//! This annotation tells Rust to run that code only when `cargo test` is called, and not `cargo build`
+//! They allow to test both public and private functions
 
 // When crating a lib with cargo a test is automatically generated as a template: the `adder`:
 pub fn add(left: u64, right: u64) -> u64 {

@@ -1,11 +1,11 @@
-/// As a project grows, it's common to have a lot of modules and files.
-/// A good organisasions can be achieved by splitting the code
-/// The module system in Rust is a way to organise code and control the visibility of code and consists of:
-/// - Packages: A Cargo feature that lets you build, test, and share crates
-/// - Crates: A tree of modules that produces a library or executable
-/// - Modules and use: Let you control the organization, scope, and privacy of paths
-/// - Paths: A way of naming an item, such as a struct, function, or module
-/// The examples are in src/lib.rs
+//! As a project grows, it's common to have a lot of modules and files.
+//! A good organisasions can be achieved by splitting the code
+//! The module system in Rust is a way to organise code and control the visibility of code and consists of:
+//! - Packages: A Cargo feature that lets you build, test, and share crates
+//! - Crates: A tree of modules that produces a library or executable
+//! - Modules and use: Let you control the organization, scope, and privacy of paths
+//! - Paths: A way of naming an item, such as a struct, function, or module
+//! The examples are in src/lib.rs
 
 fn main() {
     packages_crates();

@@ -1,6 +1,6 @@
-/// Rust standard library provides a number of data structures called collections.
-/// These collections point to data stored in the heap, which means the data can grow and shrink at runtime.
-/// The most common collections are: vectors, strings, and hash maps.
+//! Rust standard library provides a number of data structures called collections.
+//! These collections point to data stored in the heap, which means the data can grow and shrink at runtime.
+//! The most common collections are: vectors, strings, and hash maps.
 
 fn main() {
     vectors();

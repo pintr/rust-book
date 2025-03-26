@@ -1,5 +1,5 @@
-/// Enums allow to define a type by enumerating its possible variants.
-/// Enums are useful when we have a fixed set of values that we know at compile time.
+//! Enums allow to define a type by enumerating its possible variants.
+//! Enums are useful when we have a fixed set of values that we know at compile time.
 
 fn main() {
     ip_addr_kind();
