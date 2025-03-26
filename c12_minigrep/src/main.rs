@@ -36,7 +36,9 @@ fn main() {
     // The parsing of the configs can be done in many ways, using a function
     // or, even better, a constructor for the structure `Config` containing them
     let config = Config::build(&args).unwrap_or_else(|err| {
-        println!("Problem parsing arguments: {err}");
+        // Print errors to the standard error
+        // In this way it easier debugging and allow to save the result on a file without printing errors
+        eprintln!("Problem parsing arguments: {err}");
         process::exit(1)
     });
 
@@ -49,7 +51,7 @@ fn main() {
     // Since `run` returns () in the success case it's not necessary to use `unwrap_or_else`
     // Instead `if let` is used just to check if `run` returns an `Err` to manage it
     if let Err(e) = c12_minigrep::run(config) {
-        println!("Application error: {e}");
+        eprintln!("Application error: {e}");
         process::exit(1)
     }
 }
