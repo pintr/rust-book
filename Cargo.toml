@@ -13,5 +13,6 @@ members = [
     "c10_generics_traits_lifetimes",
     "c11_automated_tests",
     "c12_minigrep",
+    "c13_iterators_closures",
 ]
-default-members = ["c12_minigrep"]
+default-members = ["c13_iterators_closures"]

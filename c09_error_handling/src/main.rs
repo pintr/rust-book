@@ -67,7 +67,7 @@ fn recoverable_errors() {
         // In this case the file is created if it doesn't exist, otherwise the program panics.
         // `io::Error` is a struct provided by the standard library that has a method `kind` that returns an `ErrorKind` enum.
         // The `ErrorKind` enum provide all the `io::Error` variants, allowing to choose the condition to match, and managing all the other errors in a single branch.
-        // `mathc` is useful but primitive as well. With closures and combinators it's possible to manage errors in a more concise way:
+        // `match` is useful but primitive as well. With closures and combinators it's possible to manage errors in a more concise way:
         let _file = File::open("hello.txt").unwrap_or_else(|error| {
             if error.kind() == ErrorKind::NotFound {
                 File::create("hello.txt").unwrap_or_else(|error| {

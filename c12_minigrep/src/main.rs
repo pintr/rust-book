@@ -35,11 +35,16 @@ fn main() {
     // The other elements are the arguments provided by the user
     // The parsing of the configs can be done in many ways, using a function
     // or, even better, a constructor for the structure `Config` containing them
-    let config = Config::build(&args).unwrap_or_else(|err| {
+    let _config = Config::build_old(&args).unwrap_or_else(|err| {
         // Print errors to the standard error
         // In this way it easier debugging and allow to save the result on a file without printing errors
         eprintln!("Problem parsing arguments: {err}");
         process::exit(1)
+    });
+    // The precedent part can be improved using an iterator on `env::args()`
+    let config = Config::build(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {err}");
+        process::exit(1);
     });
 
     // Print config

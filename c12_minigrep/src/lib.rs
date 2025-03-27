@@ -21,7 +21,8 @@ impl Config {
     /// # Returns
     ///
     /// * `Result<Config, &'static str>`: a Result with the config or a string as error
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+    pub fn build_old(args: &[String]) -> Result<Config, &'static str> {
+        // This method can be improved using iterators, as follows
         // Error handling return Result with an error if the parameters are not enough
         if args.len() < 3 {
             return Err("not enough parameters");
@@ -31,6 +32,37 @@ impl Config {
         let query = args[1].clone();
         let file_path = args[2].clone();
         // Read the ignore_case value from the environment, it returns true only if the result is Ok
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
+    }
+    /// Parse `query` and `file_path` and set them as Config parameters
+    ///
+    /// # Arguments
+    ///
+    /// * `mut args: impl Iterator<Item = String>` - The arguments as a an element that implements Iterator on strings.
+    ///
+    /// # Returns
+    ///
+    /// * `Result<Config, &'static str>`: a Result with the config or a string as error
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        args.next(); // Name of the program
+
+        let query = match args.next() {
+            // The value is extracted from the iterator using a `match`
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
+
         let ignore_case = env::var("IGNORE_CASE").is_ok();
 
         Ok(Config {
@@ -89,14 +121,17 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // It is necessary to define a lifetime `'a` in the signature
     // to indicate that the returned vector should contain string slices that reference slices of the argument `contents`
-    let mut res = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            res.push(line);
-        }
-    }
-
-    res
+    // let mut res = Vec::new();
+    // for line in contents.lines() {
+    //     if line.contains(query) {
+    //         res.push(line);
+    //     }
+    // }
+    // The precedent code can be improved using iterators:
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 /// Read the content of the file, and perform the `grep` operation without case
