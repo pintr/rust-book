@@ -1,5 +1,7 @@
 [workspace]
+# Version of the resolver algorithm
 resolver = "2"
+# Packages in the workspace
 members = [
     "c01_hello_world",
     "c02_guessing_game",
@@ -14,5 +16,6 @@ members = [
     "c11_automated_tests",
     "c12_minigrep",
     "c13_iterators_closures",
+    "c14_cargo_crates",
 ]
-default-members = ["c13_iterators_closures"]
+default-members = ["c14_cargo_crates"]

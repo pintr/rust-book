@@ -1,0 +1,44 @@
+# In Rust has release profiles, which are predefined and customisable, allowing more control over options for compiling code
+# Cargo has two main profile: 
+# - `dev` for development, used when `cargo build` is run
+# - `release` for release builds, used when `cargo build --release` is run
+# Cargo has default settings for each release, but can be overrided adding a `[profile.*]` section in Cargo.toml
+# Each profile can be costumised by using`[profile.{name}]` format
+# A crate to be published requires under the `[package]` section:
+# - `name` that need to be different from any other already in the registry
+# - `description` a sentence or two describing the crate
+# - `license` which is a license identifier value from https://spdx.org/licenses, can be more than one seprated by OR
+# Once everything is set it can be published using `cargo publish`
+# The same command is used to publish a new version, after changing the `version` field in `package`
+# It is possible to deprecate a version by using `cargo yank --vers {version}` and undo it adding `--undo`
+
+[package]
+name = "c14_cargo_crates"
+version = "0.1.0"
+edition = "2024"
+description = "A package containing useful information on crates"
+license = "MIT OR Apache-2.0"
+
+# For example the default level of optimisation `opt-level` for the dev and release profiles
+# `opt-level` controls the number of optimisation Rust will apply on the code in a range of 0 to 3.
+# The `dev` profile's default is 0, while `release` profile's default is 3
+[profile.dev]
+opt-level = 1 # Override
+
+[profile.release]
+opt-level = 3
+
+# Cargo offers a feature called workspaces that can help managing multiple related packages, such as `rust-book`
+# A workspace is a set of packages that share the same Cargo.lock and output directory
+# In `rust-book` all the packages are chapter of the book
+# It is possible to add another package in the same workspace as a dependency
+# Or use an external package as `rand`
+# If it was in the c11_automated_tests package we would have had to specify it here to ensure that every crate uses the same version of `
+# When running the tests in a workspace it is possible to specify the package to test using `-p`
+[dependencies]
+c11_automated_tests = { path = "../c11_automated_tests" }
+rand = "0.9.0"
+
+# The `cargo install` allows to install and use binary crates locally as runnable tools
+# For example running `cargo install ripgrep` allows to use the command `rg` if the installation directory is in `$PATH`
+# Additionally, Cargo can be extended  with new subcommands: if they are called `cargo-something` they can be called `cargo something`
