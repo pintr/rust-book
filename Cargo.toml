@@ -17,5 +17,6 @@ members = [
     "c12_minigrep",
     "c13_iterators_closures",
     "c14_cargo_crates",
+    "c15_smart_pointers",
 ]
-default-members = ["c14_cargo_crates"]
+default-members = ["c15_smart_pointers"]
