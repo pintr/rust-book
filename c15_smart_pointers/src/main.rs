@@ -34,6 +34,7 @@ fn box_t() {
         // Data can be accesses as it was in the stack, when the box goes out of scope it will be deallocated.
         // Since in this case it's a simple i32 value they are store by default, better using a box for complex types
     }
+
     {
         // Enabling recursive types with boxes
         // A value of recusrive type can have another value of the same type as part of itself
@@ -41,5 +42,42 @@ fn box_t() {
         // Since boxes have a known size they can be used for recursive types by inserting a box in the recursive type definition
         // An example of this type is a cons list, that is made of nested pairs to form a linked list
         // For example: `(1, (2, (3, Nil)))`
+        // Each item in a cons list contains two elements: the value of the current item, and the next item. The last item contains a Nil value.
+        // A cons list is produced by recursively calling the cons function, the base case is Nil (not as `null` or `nil`).
+        // Usually in Rust a `Vec<T>` is used instead of a cons list
+        // enum List {
+        //     Cons(i32, List),
+        //     Nil,
+        // }
+        // List doesn't compile because `List` type doesn't have a known size
+        // It would have been used as follows:
+        // use List::Cons;
+        // let list = Cons(1, Cons(2, Cons(3, Nil)));
+        // The error shows that the type has inifite size saying `recursive without indirection` suggesting `insert some indirection`
+        // To determine how much space to allocate for an enum, Rust goes through each variant to see which one needs more space.
+        // Since only one variant will be used, the most space an enum would need is the space it would take to store the largest variant.
+        // This doesn't work with a recursive type, because, in the case of List, the compiler looks at the Cons variant, which holds a i32 and a List.
+        // Since it is recursive, the compiler lloks for the COns value, which holds i32 and List, and this process continues infinitely.
+        // To `insert some indirection`, instead of storing a value directly, the structure should store the value indirectly by storing the pointer to the value instead.
+        // Because `Box<T>` is a pointer, Rust always knows how much space a `Box<T>` uses, because a pointer size doesn't change on the amount of data it points to.
+        // Modifying the Const variant using a `Box<List>` instead of List will point to the next List value on the heap, instead of another List value directly.
+        // Conceptually there is still a List, butr this implementation is more like placing items next to each other instead of one insed another.
+        #[derive(Debug)]
+        #[allow(dead_code)]
+        enum List {
+            Cons(i32, Box<List>),
+            Nil,
+        }
+
+        use List::{Cons, Nil};
+
+        let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+        println!("{:?}", list)
+        // The Cons variant needs the size of an i32 plus the space to store the box’s pointer data.
+        // The Nil variant stores no values, so it needs less space than the Cons variant.
+        // Any List will take up to the size of an i32, plus the size of a box's pointer data, breaking the inifite recursive chain.
+        // Boxes provide only the indirection and heap allocation; they don’t have any other special capabilities, and they don't add performance overhead.
+        // `Box<T>` type is a smart pointer because it implements the `Deref` trait, theat allows `Box<T>` values to be treated like freferences.
+        // When `Box<T>` goes out of scopoe, the heap data the box is pointing at, is cleaned up as well because of the `Drop` trait.
     }
 }
