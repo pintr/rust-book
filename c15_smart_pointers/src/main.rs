@@ -17,7 +17,9 @@
 
 fn main() {
     box_t();
-    defer();
+    defer_trait();
+    drop_trait();
+    reference_counting();
 }
 
 fn box_t() {
@@ -83,7 +85,7 @@ fn box_t() {
     }
 }
 
-fn defer() {
+fn defer_trait() {
     // Implementing the Defer trait allows to customise the behaviour of the dereference operator *
     // Using the Defer trait permits to treat smart pointers like regular references, allowing to write code  that works on references and use that code with smart pointers too.
     // A regular reference is a type of pointer,a nd a pointer is an arrow to a value stored somewhere else, the dereference operator follows teh arrow to get the value
@@ -169,4 +171,105 @@ fn defer() {
     // The third case shows that a muitable reference can be coerced to an immutable one, but not vice versa.
     // There can be only a single reference to some data, because of the borrowing rules. Converting an immutable to a mutable reference breaks the borroing rule.
     // Converting an immutable reference to a mutable one would require that the immutable reference is the only to that data, but Rust can't guarantee it.
+}
+
+fn drop_trait() {
+    // The second trait useful for smart pointers is `Drop`, that allows to customise what happens when a value is about to go out of scope.
+    // The functionality of the `Drop` trait is almost always used when implementing smart pointers, for example when `Box<T>` is dropped, it will deallocate the space on the heap.
+    // In many languages freeing operations is done manually every time, in Rust the behaviour can be specified once using the `Drop` trait, and the compiler will add it automatically.
+    // The `Drop` trait requires to implement the method `drop` that takes a mutable reference to self:
+    struct CustomSmartPointer {
+        data: String,
+    }
+
+    // The `Drop` trait is included in the prelude, so there is no need to bring it into scope.
+    impl Drop for CustomSmartPointer {
+        fn drop(&mut self) {
+            // Print the following when the `CustomSmartPointer` is dropped.
+            println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+        }
+    }
+
+    let c = CustomSmartPointer {
+        data: String::from("my stuff"),
+    };
+
+    let d = CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+
+    println!("Created data c: {} and d: {}", c.data, d.data);
+
+    // As soon as `c` and `d` go out of scope, they print the content of the `drop` method
+    // It is possible that is needed to drop a value early, for example when smart pointers manage locks.
+    // Rust doesn't let to call the `drop` method manually, instead the functione needed is `std::mem::drop`:
+    // c.drop(); // Doesn't work
+    drop(c); // Use `std::mem::drop`
+    println!("Early drop of c!");
+
+    // The code specified in the `Drop` trait can be used to make cleanup convinient and safe
+    // Additionally the ownership system makes sure references are always valid, and the `drop` function is called only once when the value is no longer being used.
+}
+
+fn reference_counting() {
+    // There are cases when a single value might have multiple owners.
+    // For example in a graph multiple edged might point to the same node, which is conceptually owned by all of them, so it should be clean only when it doesn't have any edges.
+    // Multiple ownership must be explicitly enabled using the type `Rc<T>`, which stands for reference counting.
+    // `Rc<T>` keeps track of the numebr of references to a value to determine if it is still in use, if there are zero references it can be cleaned.
+    // `Rc<T>` is used when some data allocated on the heap is used by multiple parts of the program, but can't be determined at compile time which part finishes last, otherwise the normal ownership rules would apply.
+    // `Rc<T>` is only for use in single threaded scenarios and can be used to share data between two structure, for example the cons list:
+    {
+        #[derive(Debug)]
+        #[allow(dead_code)]
+        enum List {
+            Cons(i32, Box<List>),
+            Nil,
+        }
+
+        use List::{Cons, Nil};
+
+        let a = Cons(5, Box::new(Cons(10, Box::new(Nil)))); // List shared between `b`, and `c`
+        let b = Cons(3, Box::new(a)); // Valid because `a` is moved into `b`, and becomes its owner.
+        println!("b: {:?}", b)
+        // let c = Cons(4, Box::new(a)); // Not valid because `a` has been moved into `b`
+        // One way to fix this would be changing the definition of `Cons` to hold references, but then the lifetime would be required.
+    }
+    {
+        // Another way of managing is changing the definition of `List` using `Rc<T>` instead of `Box<T>`.
+        // In this case each `Cons` variant will hold a n`Rc<T>` value pointing to a `List` and, when `b` is created, instead of taking ownership of `a`, the `Rc<List>` hold by `a` is cloned.
+        // In this case the number of references increases, letting `a` and `b` to share ownership of the `Rc<List>`, allowing to create and share ownership with `c` too.
+        // The reference count increases each time `Rc::clone` is called, and the data won't be cleaned up until the data within `Rc<List>` has no references to it
+
+        #[derive(Debug)]
+        #[allow(dead_code)]
+        enum List {
+            Cons(i32, Rc<List>),
+            Nil,
+        }
+
+        use std::rc::Rc;
+        use List::{Cons, Nil};
+
+        let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil))))); // List shared between `b`, and `c`
+        let b = Cons(3, Rc::clone(&a)); // The `Rc<List>` in `a` is cloned, allowing multiple ownership
+        let c = Cons(4, Rc::clone(&a));
+        println!("a: {:?}, b: {:?}, c: {:?}", a, b, c);
+        // `Rc<T>` is not in the prelude, so it needs to bi brought into scope.
+        // We could have used `a.clone()` instead of `Rc::clone` but the convention is to use the latter, because most implementations of `clone` make a deep copy of all the data, while `Rc::clone` only increases the reference count.
+        // To check the reference counting `Rc` provides the method `Rc::strong_count`:
+        {
+            let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+            println!("Count after creating a = {}", Rc::strong_count(&a));
+            let _b = Cons(3, Rc::clone(&a));
+            println!("Count after creating b = {}", Rc::strong_count(&a));
+            {
+                let _c = Cons(4, Rc::clone(&a));
+                println!("Count after creating c = {}", Rc::strong_count(&a));
+            }
+            println!("Count after c goes out of scope = {}", Rc::strong_count(&a));
+        }
+        // In this example the reference count can be seen as it increases and decreases base on the `clone` and `drop` operations
+        // `Rc<T>` allows to share data between multiple parts of the program reading only
+        // If `Rc<T>` allowed modifying it would violate the borrowing rules: multiple mutable borrows to the same place can cause data races and inconsistencies.
+    }
 }
