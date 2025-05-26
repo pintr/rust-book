@@ -24,7 +24,7 @@ struct User {
 struct Color(i32, i32, i32);
 struct Point(i32, i32, i32);
 
-struct Unit; // Unit-like empty struct, useful in generics when there is need to impleent a trait but don't need any data.
+struct Unit; // Unit-like empty struct, useful in generics when there is need to implement a trait but don't need any data.
 
 fn main() {
     user_instances();
