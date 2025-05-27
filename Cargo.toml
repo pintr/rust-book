@@ -18,5 +18,6 @@ members = [
     "c13_iterators_closures",
     "c14_cargo_crates",
     "c15_smart_pointers",
+    "c16_concurrency",
 ]
-default-members = ["c15_smart_pointers"]
+default-members = ["c16_concurrency"]
