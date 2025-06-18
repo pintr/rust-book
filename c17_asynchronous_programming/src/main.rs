@@ -15,11 +15,11 @@
 use trpl::Either;
 
 fn main() {
-    future_async();
+    futures_async();
     concurrency_with_async();
 }
 
-fn future_async() {
+fn futures_async() {
     // The main elements of async programming in Rust are futures, and `async/await` keywords
     // A `future` is a value that may be not ready now, but it will in the future.
     // Rust provides a `Future` trait as a building block, so async operations can be imlemented with a common interface
