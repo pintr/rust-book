@@ -223,7 +223,7 @@ fn rc_t() {
     // There are cases when a single value might have multiple owners.
     // For example in a graph multiple edged might point to the same node, which is conceptually owned by all of them, so it should be clean only when it doesn't have any edges.
     // Multiple ownership must be explicitly enabled using the type `Rc<T>`, which stands for reference counting.
-    // `Rc<T>` keeps track of the numebr of references to a value to determine if it is still in use, if there are zero references it can be cleaned.
+    // `Rc<T>` keeps track of the number of references to a value to determine if it is still in use, if there are zero references it can be cleaned.
     // `Rc<T>` is used when some data allocated on the heap is used by multiple parts of the program, but can't be determined at compile time which part finishes last, otherwise the normal ownership rules would apply.
     // `Rc<T>` is only for use in single threaded scenarios and can be used to share data between two structure, for example the cons list:
     {
