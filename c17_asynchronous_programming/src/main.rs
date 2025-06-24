@@ -626,7 +626,7 @@ fn multiple_futures() {
         });
         // Because futures compose with other futures, powerful tools can be built using smaller async building blocks, e.g. timeouts with retries for network calls for example
         // The most common tools are `async`, `await` with macros such as `join`, `join_all`, and `race`.
-        // Multiple futures in a sequence over time build a stream
+        // Multiple futures in a sequence over time build a stream.
     }
 
     /// Tries to run a future before the timeout elapses.
