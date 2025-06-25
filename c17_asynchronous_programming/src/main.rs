@@ -1,4 +1,4 @@
-//! There are multiple techniques to perform operation while waitin other long running processes to complete: parallelism, concurrency, and asynchronous programming
+//! There are multiple techniques to perform operation while waiting other long running processes to complete: parallelism, concurrency, and asynchronous programming
 //! In asynchronous programming operations may not finish sequentially in the order they were started.
 //! Rust provides futures, streams, the `async` and `await` syntax, and other tools for managing and coordinating asynchronous operations.
 //! OSs already provide a form of concurrency with interrupts, which allow to switch context during its use, allowing multiple process to run simultaneously.
