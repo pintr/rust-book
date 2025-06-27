@@ -20,5 +20,6 @@ members = [
     "c15_smart_pointers",
     "c16_concurrency",
     "c17_asynchronous_programming",
+    "c18_object_oriented_programming",
 ]
-default-members = ["c17_asynchronous_programming"]
+default-members = ["c18_object_oriented_programming"]
