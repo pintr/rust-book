@@ -9,17 +9,19 @@
 //! - Concurrency: an individual works on several different task before any of them is completed, requires switching.
 //! - Parallelism: two different task work independently at the same time.
 //! In both workflows it may be necessary to coordinate the defferent tasks. Some work may be done in parallel, other could be serial (one after the other)
-//! For example  amachine with a single CPU core can perform an operation at a time, but it can work concurrently by switching its context. With multi-core it can work in parallel too.
-//! In Rust with `async` it's dealing cocnurrency, but it may use parallelism under the hood.
+//! For example a machine with a single CPU core can perform an operation at a time, but it can work concurrently by switching its context. With multi-core it can work in parallel too.
+//! In Rust with `async` it's dealing concurrency, but it may use parallelism under the hood.
 
 fn main() {
-    // futures_async();
-    // concurrency_with_async();
-    // multiple_futures();
+    futures_async();
+    concurrency_with_async();
+    multiple_futures();
     streams();
+    traits_async();
+    futures_tasks_threads();
 }
 
-fn _futures_async() {
+fn futures_async() {
     // The main elements of async programming in Rust are futures, and `async/await` keywords
     // A `future` is a value that may be not ready now, but it will in the future.
     // Rust provides a `Future` trait as a building block, so async operations can be imlemented with a common interface
@@ -131,7 +133,7 @@ fn _futures_async() {
     }
 }
 
-fn _concurrency_with_async() {
+fn concurrency_with_async() {
     use std::time::Duration;
 
     // In many cases the APIs for working with concurrency using async are very similar to those for using threads, in other cases they are similar but with a different behaviour
@@ -321,7 +323,7 @@ fn _concurrency_with_async() {
     });
 }
 
-fn _multiple_futures() {
+fn multiple_futures() {
     use std::{
         pin::{Pin, pin},
         thread,
@@ -821,4 +823,197 @@ fn streams() {
 
         ReceiverStream::new(rx)
     }
+}
+
+fn traits_async() {
+    // For asynchronous programming the traits used are `FUture`, `Pin`, `Unpin`, `Stream`, and `StreamExt`.
+    // Here is the description in details
+    {
+        // `Future` trait
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        pub trait _Future {
+            type Output;
+
+            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>;
+        }
+        // `Future`'s associated type `Output` says what the future resolves to, as `Item` for `Iterator`, so the type of value it produces once completed
+        // Additionally it has the `poll` method that takes a `Pin` reference for its `self` parameter and a mutable reference to a `Context` type, and returns a `Poll<Self::Output>`
+        // The `Poll` type is as follows:
+        enum _Poll<T> {
+            Ready(T),
+            Pending,
+        }
+        // The `Poll` type is similar ot an `Option`: it has a variant with a value `Ready(T)`, and one without: `Pending`
+        // The `Pending` variant means thatthe future still has work to do, the `Ready` means the future has finished and the `T` value is available
+        // With most futures the caller shouldn't call `poll` again after the future returned `Ready` because they may panic
+        // When code uses `await`, Rust compiles it to code that calls `poll`, for the `url_page_title` function, for example, it translates to something like this:
+        // let mut url_page_title = page_title(url);
+        // loop {
+        //     match url_page_title.poll() {
+        //         Ready(value) => match page_title {
+        //             Some(title) => println!("The title for {url} was {title}"),
+        //             None => println!("{url} had no title"),
+        //         },
+        //         Pending => {
+        //             // continue
+        //         }
+        //     }
+        // }
+        // With the difference that `await` in this case would be blocking, so Rust makes sure that the loop can hand off control to something that can pause eork on this future to work on other futures, and check it later
+        // Scheduling and coordination work is one of the main jobs of an async runtime
+        // For example `rx.recv` call returns a future, and awaiting the future polls it.
+        // A runtime would pause the future until it's ready with either `Some(message)` or `None` when the channel closes.
+        // The runtime knows the future isn't ready when it returns `Poll::Pending`, and knows it's reaady when `poll` returns `Poll::Ready(Some(message))` or `Poll::Ready(None)`
+        // The basic mechanic of futures is: a runtime polls each future it is responsible for, and put it back to sleep when it's not ready.
+    }
+    {
+        // `Pin` and `Unpin` traits
+        // The `trpl::join_all` funcion returns a struct `JoinAll` over a generic type `F` which is constrained to implement the `Future` trait
+        // DIrectly awaiting a future with `await` pins the future implicitly, that's why `pin!` is not needed everywhere
+        // However `trpl::join_all` constructs a new future `JoinAll` by passing a colleciton of futures to the function `join_all`
+        // The signature of `join_all` requires taht the types of the items in the collection implement the `Future` trait, and `Box<T>` implements `Future` only if `T` it wraps is a future that implements `Unpin`
+        // The `cx` parameter of `poll`, and its `Context` type are the key of how a runtime knows when to check any given future
+        // `self` instead has a type annotation similar to any type annotations but with two differences:
+        // - It tells Rust what type `self` must be for the method to be called
+        // - It can't be any type, it's restricted to the type on which the method is implemented (reference or smart pointer), or a `Pin` wrapping a reference to that type
+        // In order to poll a future to check whether it's `Pending` or `Ready(Output)` a `Pin`-wrapped mutable reference to the type is needed.
+        // `Pin` is a wrapper for pointer-like types such as `&`, `&mut`, `Box`, and `Rc`, technically `Pin` works on types that implement `Deref` or `DerefMut`
+        // `Pin` is not a pointer itself and doesn't have any behaviour by itself, it's just a tool the compiler can use to enforce constraints on pointer usage.
+        // A series of await points in a future get compiled ina state machine that follow alle the normal safety rules, including borrowing and ownership
+        // To make that work Rust looks at what data is needed between one await point and either the next await point or the end of the async block.
+        // It then creates a corresponding variant in the compiled state machine, each variant gets the access it needs to that data used in that section of the code by taking ownership or getting a reference to it.
+        // If something is wrong with ownership or reference in an async block the borrow checker will tell it.
+        // Things get trickier when moving around the future that corresponds to that block, such as moving into a `Vec` to pass to `join_all`
+        // When moving a future such as pushing it into a data structure or returning it from a function, means moving the state machine created by Rust
+        // The future it creates for async blocks can end up with references to themselves in the field of any given variant
+        // By default any object with referenceso to itself is unsafe to move because references always point to actual memory address of what they refer
+        // When moving the data structure itself, the internal references will be left pointing to the old location, which is now invalid, so the value will not be updated or that memory could be used for unrelated data.
+        // The Rust compiler could update every reference, but this would introduce al lot of performance overhead, especially with many references.
+        // Instead making sure that data structure doesn't move in memory there would be no need to update any reference,
+        // This is exactly what the borrow checker requires:in safe code it prevents from moving any item with an active reference to it.
+        // `Pin` gives that exact guarantee, when a value is pinned it can no longer move, so with `Pin<Box<SomeType>>` the `SomeType` value is pinned, not the `Box`
+        // The `Box` pointer can still move around becausse the important thing is making sure the data stays in place, if a pointer moves but the data it points is in the same place there is no potential problem.
+        // Self-referential type cannot move because it's still pinned.
+        // Most types are safe to move around, even if they are behind a `Pin` wrapper, only items with internal references require pinning.
+        // For example for `Pin<Vec<String>>` everything needs to be done using `Pin` APIs even if `Vec<String>` is always safe to move if there are no references to it
+        // In order to tell the compiler that an item is safe to move the trait `Unpin` is used
+        // `Unpin` is  amarker trait similar to `Send` and `Sync`, so it has no functionalities by its own, they only exist to tell the compiler it's safe to use the type implementing a given trait in a particular context.
+        // In particular `Unpin` informs the compiler that a give type doesn't need to uphold any guarantees about whether the value can be safely moved.
+        // As `Send` and `Sync` the compiler implements `Unpin` automatically for the types it can prove it's safe, but it's possible a type doesn't implement it
+        // If `SomeType` doesn't implement `Unpin` it means that it cannot safely moved in memory after being pinned, possibly because it has self references, this is expressed with this form: `impl !Unpin for SomeType`
+        // There are two things to keep in mind about the relationship between `Pin` and `Unpin`:
+        // - `Unpin` is the normal case, and `!Unpin` is the special case
+        // - Whether a type implements one of the two only matters when using a pinned pointer to that type like `Pin<&mut SomeType>`
+        // For example a `String` has a length and the chars, it can be wrapped in `Pin` and it automatically implements `Unpin`
+        // On that `String` it is possible to do some operations which would be illegal if `String` implemented `!Unpin`, such as replacing a string with another
+        // This doesn't violate the `Pin` contract, because `String` doesn't have internal references to make it unsafe to move around, which is the reason why it implements `Unpin` instead of `!Unpin`
+        // When trying to move futures produced by an async block into `Vec<Box<dyn Future<Output = ()>>>` gives error because futures have internal references, so they don't implement `Unpin` and they need to be pinned.
+        // `Pin` and `Unpin` are used for lower-level libraries, such as implementing a runtime more than day-to-day code
+    }
+    {
+        // `Stream` trait
+        // Streams are similar to asynchronous iterators but, unlike `Iterator` and `Future` they don't have definition in the standard library, even if there is a very common definition form the `futures` crate
+        // Streams merge `Iterator` and `Future`: form `Iterator` there is the idea of sequence, from `Future` the idea of rediness over time
+        // The definition of `Stream` could be a sequence of items that become ready over time and it's implemented like this:
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        trait _Stream {
+            type Item;
+
+            fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>>;
+        }
+
+        // The `Stream` trait defines an associated type called `Item` for the type of the items produced by the stream.
+        // Similarly to `Iterator` there may be 0 to many items and unlike `Future` where there is only a single `Output`
+        // They also define a method to get those items called `poll_next` which polls as in `Future::poll` and produces a sequence as in `Iterator::next`
+        // Its return type combines `Poll` with `Option`, the outer type is `Poll` because it has to be checked for readiness, the inner type is `Option` because it needs to signal if there are more messages.
+        // In the previous example `next` and `StreamExt` were used, even if `poll_next` and `Stream` could have been used, but it's easier to use
+        // `StreamExt` supplies next as follows:
+        trait _StreamExt: _Stream {
+            async fn next(&mut self) -> Option<Self::Item>
+            where
+                Self: Unpin;
+
+            // other methods...
+        }
+        // In fact is slightly different  because it supports versions of Rust that did not support using async funcitons in traits: fn next(&mut self) -> Next<'_, Self> where Self: Unpin;
+        // `StreamExt` is automatically implemented  for every type implementing `Stream` and has many methods to use with streams, but are defined separately to use convenience APIs without affecting the foundation trait.
+        // In `trpl::StreamExt` the trait defines `next` and also supplies a default implementation of `next` that handles the datails of calling`Stream::poll_next`
+        // This means that implementing a custom streaming data type requires to implement `Stream` and anyone using it can rely on `StreamExt`.
+    }
+}
+
+fn futures_tasks_threads() {
+    // Two approaches to concurrency have been covered: threads, and aync with futures and streams.
+    // Many OSs supply threading based concurrency models, however they have their tradeoff: they use memory and come with overhead for starting up and shutting down.
+    // Additionally OSs must support threads, traditional computers do, some embedded systems don't.
+    // The async provides a different set of tradeoffs. In async model concurrent operations don't require threads, but they can run on tasks
+    // A task is similar to a thread but it's managed by the library level code runtime instead of the OS
+    // A stream can be built using an async channel and spawning an async task.
+    // The same can be done using threads: instead of `trpl::spawn_task` use `thread::spawn`, and instead of `trpl::sleep` use `thread::sleep` from the std
+    // For example the `get_intervals` function could become as follows:
+    use std::{thread, time::Duration};
+    use trpl::{ReceiverStream, Stream};
+
+    fn _get_intervals() -> impl Stream<Item = u32> {
+        let (tx, rx) = trpl::channel();
+
+        thread::spawn(move || {
+            let mut count = 0;
+
+            loop {
+                thread::sleep(Duration::from_millis(1));
+                count += 1;
+
+                if let Err(send_error) = tx.send(count) {
+                    eprintln!("Could not send interval {count}: {send_error}");
+                    break;
+                };
+            }
+        });
+
+        ReceiverStream::new(rx)
+    }
+
+    // The output of this code is the same as the already implemented `get_intervals` but is spawns OS threads instead of async tasks
+    // Despite being similar they behave very differently: in modern PCs it is possible to spawn a huge number of async tasks but, with threads, they would run out of memory.
+    // However the APIs are very similar for a reason:
+    // Threads act as boundary for sets of synchronous operations, concurrency is possible between threads.
+    // Tasks act as a boundary for sets of asynchronous operations, concurrency is possible both between ans within tasks because they can switch between futures in its body.
+    // Futures are Rust's most granular unit of concurrency, and each future can represent a tree of other futures.
+    // The runtime manages tasks, and tasks manage future, so tasks are similar to lightweight runtime-managed threads with the capabilities provided by the runtime instead of the OS.
+    // This doesn't mean tasks are always better: threads can be simpler as they run to completion without being interrupted except by the OS
+    // Threads, additionally, have no support for intratask concurrency and have no mechanism for cancellation and clean up is delegated to the OS.
+    // These limitations make the threads harder to compose then futures, which are richer data structures that can be composed more naturally.
+    // Additionally tasks give additional control over futures allowing to chose wehre and how to group them, additionally tasks can be moved around between threads.
+    // In fact the runtime used is multithreaded by default, and use the mechanism of work stealing to move tasks around based on how the threads are used to improve the system performances.
+    // The choice between them can be done following this rule:
+    // - Work is very parallelizable, such as processing data where each part can be processed separately, then threads are better
+    // - Work is very concurrent, such as handling messages form different sources that can come at different intervals and rates, then the better choice is async
+    // if both are needed then the two can be combined as in the following example:
+
+    // Create an async channel
+    let (tx, mut rx) = trpl::channel();
+
+    // Create a thread that takes ownership of the sender
+    thread::spawn(move || {
+        for i in 1..11 {
+            // Send numbers from 1 to 10 then sleep for a second between each.
+            tx.send(i).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    // Create a runtime for the future
+    trpl::run(async {
+        // In the future await for the messages and print them
+        while let Some(message) = rx.recv().await {
+            println!("{message}")
+        }
+    });
+
+    // An example of scenario is runnig a set of video encoding tasks using a dedicated thread but notifying th UI that the operations are done with an async channel
 }
