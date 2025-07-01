@@ -21,5 +21,6 @@ members = [
     "c16_concurrency",
     "c17_asynchronous_programming",
     "c18_object_oriented_programming",
+    "c19_patterns_matching",
 ]
-default-members = ["c18_object_oriented_programming"]
+default-members = ["c19_patterns_matching"]
