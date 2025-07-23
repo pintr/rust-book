@@ -12,6 +12,8 @@
 //! For example a machine with a single CPU core can perform an operation at a time, but it can work concurrently by switching its context. With multi-core it can work in parallel too.
 //! In Rust with `async` it's dealing concurrency, but it may use parallelism under the hood.
 
+use std::future::Future;
+
 fn main() {
     futures_async();
     concurrency_with_async();
@@ -58,17 +60,19 @@ fn futures_async() {
                 .map(|title_element| title_element.inner_html())
         }
         // When Rust sees a block with the `async` keyword, it compiles it into a unique, anonymous data type that implements the `Future` trait
-        // When RUst sees a function marked with `async` it compiles it into a non-async funciton whose body is an async block, the return type is the type of the anonymous data type
+        // When RUst sees a function marked with `async` it compiles it into a non-async function whose body is an async block, the return type is the type of the anonymous data type
         {
             // The above function can be equivalently written as follows:
             // It uses the `impl Trait` syntax and the returned trait is a Future with an associated type of Output
             fn _page_title(url: &str) -> impl Future<Output = Option<String>> {
+                // Since the function parameter `url` is a borrowed string slice, it doesn't own the data it points to, so the borrowed value needs to be converted to an owned `String`
+                let url = url.to_string();
                 // All the code is in a`sync move` block, which is an expression returned from the function.
                 // The async block produces a value of type `Option<String>` which matches the `Output` type of the return type
                 // The body is in a n `async move` block because it uses the `url` parameter
                 async move {
-                    let response_text = trpl::get(url).await.text().await;
-                    Html::parse(&response_text)
+                    let text = trpl::get(&url).await.text().await;
+                    Html::parse(&text)
                         .select_first("title")
                         .map(|title| title.inner_html())
                 }
@@ -325,7 +329,7 @@ fn concurrency_with_async() {
 
 fn multiple_futures() {
     use std::{
-        pin::{Pin, pin},
+        pin::{pin, Pin},
         thread,
         time::{Duration, Instant},
     };

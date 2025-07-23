@@ -22,11 +22,12 @@ license = "MIT OR Apache-2.0"
 # For example the default level of optimisation `opt-level` for the dev and release profiles
 # `opt-level` controls the number of optimisation Rust will apply on the code in a range of 0 to 3.
 # The `dev` profile's default is 0, while `release` profile's default is 3
-[profile.dev]
-opt-level = 1 # Override
 
-[profile.release]
-opt-level = 3
+# [profile.dev]
+# opt-level = 1 # Override
+
+# [profile.release]
+# opt-level = 3
 
 # Cargo offers a feature called workspaces that can help managing multiple related packages, such as `rust-book`
 # A workspace is a set of packages that share the same Cargo.lock and output directory
