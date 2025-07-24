@@ -9,6 +9,7 @@
 fn main() {
     unsafe_rust();
     advanced_traits();
+    advanced_types();
 }
 
 fn unsafe_rust() {
@@ -46,7 +47,7 @@ fn unsafe_rust() {
         let mut num = 5;
         let r1 = &raw const num; // Immutable raw pointer
         let r2 = &raw mut num; // Mutable raw pointer
-                               // Raw pointers can be created in safe code, but they can't be dereferenced outside an unsafe block.
+        // Raw pointers can be created in safe code, but they can't be dereferenced outside an unsafe block.
         unsafe {
             // In this unsafe block it is possible to print the values, in safe code it's not
             // In order to dereference them the dereference operator `*` is used.
@@ -322,5 +323,168 @@ fn advanced_traits() {
         // In this case `Wrapper` would be exaclty as `Vec<T>`.
         // If the new type requires all the methods of the inner type, implementing `Deref` on `Wrapper` to return the iiner type is a solution.
         // If it's not required to have all the methods, just some, they need to be implemented manually.
+    }
+}
+
+fn advanced_types() {
+    // Rust type system allow some advanced features such as newtypes, type aliases, never type, and dynamic sized types
+    {
+        // Using the Newtype Pattern for Type Safety and Abstraction
+        // The newtype pattern is useful for tasks such as statistically enforcing that values are never confused, and indicating the units of values.
+        // An example is `Millimeters` and `Meters` structs that wrapped a `u32` value in a newtype.
+        // Writing a funciton with parameter `Millimeters`, the program wouldn't compile if called passing `Meters` or `u32`
+        // Newtype pattern can be used to abstract some implementation details of a type, i.e. exposing a public API different from the private inner type.
+        // Newtypes can also hide internal implementatoin, for example providing a `People` type to wrap an `HashMap<i32, String>` storing IDs with their names.
+        // Code using `People` would only interact with the public API provided, such as adding a new element to the `People` collection.
+        // The newtype pattern is a lightweight way to achieve encapsulation to hide implementation details.
+    }
+    {
+        // Creating Type Synonyms with Type Aliases
+        // Rust also provides the ability to create a type alias to give an existing type another name.
+        // To do this the `type` keyword is used:
+        type Kilometers = i32;
+        // In this case `Kilometers` is a synonym of `i32`, but it's not a separate, new type, they can be trated as `i32`:
+        let x: i32 = 5;
+        let y: Kilometers = 5;
+        println!("x + y = {}", x + y);
+        // Since `Kilometers` and `i32` are the same type, they can be used interchangeably, but the type-checking benefits are not available in this case.
+        // in other words, mixing `Millimeters` and `i32` the compiler won't give errors.
+        // They can be used for reducing repetition, for example a lenghty type such as:
+        {
+            let _f: Box<dyn Fn() + Send + 'static> = Box::new(|| println!("hi"));
+            // Writing this lengthy type in function signatures and as type annotations all over the code can be tiresome and error prone
+            fn _takes_long_type(_f: Box<dyn Fn() + Send + 'static>) {}
+
+            fn _returns_long_type() -> Box<dyn Fn() + Send + 'static> {
+                Box::new(|| println!("hi"))
+            }
+        }
+        // A type alias makes the code more manageable and readable:
+        {
+            type Thunk = Box<dyn Fn() + Send + 'static>;
+
+            let _f: Thunk = Box::new(|| println!("hi"));
+
+            fn _takes_long_type(_f: Thunk) {}
+
+            fn _returns_long_type() -> Thunk {
+                Box::new(|| println!("hi"))
+            }
+        }
+        // This code is much easier to read and write, and, choosing a meaningful name, can help communicate the intent as well.
+        // Type aliases are also used with the `Result<T, E>` type for reducing repetition.
+        // The `std::io` module often return a `Result<T, E>` to handle situations twhen operators fail to work
+        // This library has `std::io::Error` struct to represent all the I/O errors
+        // many of the functions in `std::io` will be returning `Result<T, E>`, where `E` is `std::io::Error`, such as the `Write` trait:
+
+        use std::fmt;
+        use std::io::Error;
+
+        {
+            pub trait _Write {
+                fn write(&mut self, buf: &[u8]) -> Result<usize, Error>;
+                fn flush(&mut self) -> Result<(), Error>;
+
+                fn write_all(&mut self, buf: &[u8]) -> Result<(), Error>;
+                fn write_fmt(&mut self, fmt: fmt::Arguments) -> Result<(), Error>;
+            }
+        }
+        {
+            // The `Result<..., Error>` is repeated a lot, so `std::io` has this type alias:
+            type _Result<T> = std::result::Result<T, std::io::Error>;
+            // This means that `std::io::Result<T>` is a `Result<T, E>` with `E` filled in as `std::io::Error`
+            // The `write` function, for example, becomes:
+            pub trait _Write {
+                fn write(&mut self, buf: &[u8]) -> _Result<usize>;
+                fn flush(&mut self) -> _Result<()>;
+
+                fn write_all(&mut self, buf: &[u8]) -> _Result<()>;
+                fn write_fmt(&mut self, fmt: fmt::Arguments) -> _Result<()>;
+            }
+        }
+        // the type alias helps in two ways: it makes code easier to write and gives a consistent interface across all `std::io`
+        // Being an alias is just another `Result<T, E>`, meaning that any method working on `Result<T, E>` can be used, as well as the `?` operator
+    }
+    {
+        // The Never Type That Never Returns
+        // Rust has a special type named `!` that's known in type teory as the empty type because it has no values
+        // It can be called the never type because it stands in the place of the return type that will never return:
+        fn _bar() -> ! {
+            panic!("This function never returns!")
+        }
+        // The function `bar` returns never, and it's called a diverging function.
+        // The never type is used with `continue` too:
+        // This example shows how `continue` would be used in a loop context
+        let mut _guess = String::from("5");
+        loop {
+            let _guess: u32 = match _guess.trim().parse() {
+                Ok(num) => num,
+                Err(_) => continue,
+            };
+            break;
+        }
+        // The `match` arms must return all the same type, is `Err` would have returned a value such as a string, this wouldn't compile
+        // `continue` has a `!` value: when Rust computes the type of `guess` it looks at both arms, so `u32` and `!`.
+        // Beacuse `!` can never have a value, Rust declares the type of guess as `u32`.
+        // Because `!` can be coerced into any type, it's allowed to end the `match` with `continue`,
+        // Because `continue` doesn't return a value and it moves the control back to the top of the loop so `Err` doesn't assign a value.
+        // The never type is useful with `panic!` too, since its type is `!` the result of the overall `match` expression is `T` with `Option`:
+        enum _Option<T> {
+            Some(T),
+            None,
+        }
+
+        impl<T> _Option<T> {
+            pub fn _unwrap(self) -> T {
+                match self {
+                    _Option::Some(val) => val,
+                    _Option::None => panic!("called `Option::unwrap()` on a `None` value"),
+                }
+            }
+        }
+        // In this case Rust sees that `val` has type `T` and `panic!` has type `!`, so the result overall is `T`
+        // `panic!` doesn't produce a value, it ends the program.
+        // Another expression using never is `loop`:
+        print!("forever ");
+
+        loop {
+            print!("and ever");
+            break;
+        }
+        // In this case is not true because `break` terminates, without it it would never end, so the value of the expressoin is `!`.
+    }
+    {
+        // Dynamically Sized Types and the Sized Trait
+        // Rust needs to know certain details about its types, such as how much space to allocate.
+        // There are dynamically sized types (DST) whose size is only known at runtime.
+        // For example `str` is a DST wince the length isn't known until runtime, meaning it's not possible to create a variable of type `str` or take it as argument.
+        // let s1: str = "Hello there!";
+        // let s2: str = "How's it going?";
+        // The above code doesn't work because Rust needs to know how much memory to allocate for any value of a particular type, and all values of a type use the same amount of memory.
+        // In this case `s1` and `s2` have different lengths so it's impossible to create a variable that holds dynamically sized types
+        // It's possible to fix it using a string slice `&str` instead, which just stores the starting position and the length of the slice.
+        // Althought a `&T` is a single value that stores the meory address of `T`, `&str` is two values: address of `str` and its length.
+        // At compile time `&str` it's twice the length of a `usize`.
+        // The size of `&str` is always known, no matter how long the string is.
+        // This is how synamically sized types work in Rust: they have an extra bit of metadata to store the size of the dynamic information.
+        // The golden rule is that values of dynamically sized types need to be behind a pointer.
+        // `str` can be combined with all kind of pointer, such as `Box<str>` or `Rc<str>`.
+        // Every trait is a DST and can be referred with the name of the trait and to use them as trait objects, they need to be behind a pointer (`&dyn Trait`, `Box<dyn Trait>`, ...)
+        // To work with DSTs Rust provides the `Sized` trait to determine whether or not  a type size is known at compile time.
+        // This trait is implemented automatically for everything whose size is known at compile time, additionally Rust implicitly adds a bound on `Sized` to every generic function:
+        {
+            fn _generic<T>(_t: T) {}
+        }
+        // Is treated as:
+        {
+            fn _generic<T: Sized>(_t: T) {}
+        }
+        // By default generic functions will work only on types with known size at compile time, bu the following syntax allows to relax this restriction:
+        {
+            fn _generic<T: ?Sized>(_t: &T) {}
+        }
+        // A trait bound on `?Sized` means `T` may or may not be `Sized`, overriding the default that generic types must have a known size at compile time.
+        // The `?Trait` syntax with this meaning is only available on `Sized`
+        // The parameter `t` alsa switched from `T` to `&T` because the type might not be `Sized` so it must be put behind a pointer.
     }
 }
