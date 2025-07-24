@@ -10,6 +10,8 @@ fn main() {
     unsafe_rust();
     advanced_traits();
     advanced_types();
+    advanced_functions_closures();
+    macros();
 }
 
 fn unsafe_rust() {
@@ -448,7 +450,7 @@ fn advanced_types() {
         print!("forever ");
 
         loop {
-            print!("and ever");
+            println!("and ever");
             break;
         }
         // In this case is not true because `break` terminates, without it it would never end, so the value of the expressoin is `!`.
@@ -488,3 +490,101 @@ fn advanced_types() {
         // The parameter `t` alsa switched from `T` to `&T` because the type might not be `Sized` so it must be put behind a pointer.
     }
 }
+
+fn advanced_functions_closures() {
+    // Here are some advanced features related to functions and closures, including funciton pointers and returning closures.
+    {
+        // Function Pointers
+        // Regular functions can be passed to functions, similarly to closures, with the difference it doesn't reuqire to redifining the closures
+        // Functions coerce to the type `fn`, not to be ocnfused with `Fn` closure trait. The `fn` type is called function pointer
+        // Passing functions with function pointer will allow to use functions as arguments to other functions.
+        fn add_one(x: i32) -> i32 {
+            x + 1
+        }
+
+        fn do_twice(f: fn(i32) -> i32, arg: i32) -> i32 {
+            // This function takes two parameters:
+            // - A function pointer to any function that takes an `i32` and returns an `i32`
+            // - A `i32` value
+            // The `f` function is called twice, passing `arg` and adds up the result
+            f(arg) + f(arg)
+        }
+
+        // The paramteres of `do_twice` are the function `add_one`, and `5`
+        let res = do_twice(add_one, 5);
+        println!("The answer is: {res}");
+        // The code returns `12`
+        // Unlike closures, `fn` is a type rather than a trait, so `fn` is specified as parameter directly, instead of using a generic parameter with a trait.
+        // Function pointers implement all three of the closure traits: `Fn`, `FnMut`, and `FnOnce`, so a function can be passed as an argument when a closure is expected.
+        // So it's best to write function using generic type and one of the closure traits, so other function can accept functions or closures.
+        // This can be useful to interface with external code that doesn't have closures, e.g. C functions accept functions but C doesn't have closures.
+        // Example: To use the `map` method provided by the `Iterator` trait to turn vector of numbers into a vector of strings, both closures and functions can be used:
+        let list_of_numbers = vec![1, 2, 3];
+        let mut list_of_strings: Vec<String> =
+            list_of_numbers.iter().map(|i| i.to_string()).collect();
+
+        println!("Result of closure:");
+        for s in list_of_strings {
+            println!("{s}")
+        }
+
+        list_of_strings = list_of_numbers.iter().map(ToString::to_string).collect();
+        // Here the fully qualified syntax is used to specify the `to_string` function to use (from the `ToString` trait)
+        // `ToString` is implemented for any type that implements `Display`.
+        println!("Result of function:");
+        for s in list_of_strings {
+            println!("{s}")
+        }
+        // In enum values each variant becomes an initializer function, which can be used as funciton pointers with closure traits.
+        // This means an enum variant can specify the initailizer functoins as arguments for methods that take closures:
+        #[allow(dead_code)]
+        {
+            enum Status {
+                Value(u32),
+                Stop,
+            }
+            // `Status::Value` instances are created using each `u32` value in the range on which `map` is called
+            let _list_of_statuses: Vec<Status> = (0u32..20).map(Status::Value).collect();
+        }
+        // Both closures and function can be used and they compile the same code.
+    }
+    {
+        // Returning Closures
+        // Closures are represented by traits, so they can't be returned directly.
+        // In most cases, when trait could be returned, instead it can be returned a concrete type that implements the trait as return value.
+        // Usually it doesn't work with closures, because they don't have a returnable concrete type, so `fn` can't be used as return type for closures.
+        // With the `impl Trait` syntax any function type can be returned, using `Fn`, `FnOnce`, and `FnMut`:
+        fn _returns_closure() -> impl Fn(i32) -> i32 {
+            |x| x + 1
+        }
+        // however each closure is its distintive type, so, when is needed to work with multiple functions with the same signature bu different implementation, a trait object is needed.
+        fn _returns_initialized_closure(init: i32) -> impl Fn(i32) -> i32 {
+            move |x| x + init
+        }
+
+        // let handlers = vec![returns_closure(), returns_initialized_closure(123)];
+        // for handler in handlers {
+        //     let output = handler(5);
+        //     println!("{output}");
+        // }
+        // The code above doesn't compile because both the funciton return the same type, but the closures they return are different.
+        // Whenever `impl Trait` is returned Rust creates a unique opaque type, which cannot be seen into details.
+        // If both the funciotns return the same trait `Fn(i32) -> i32`, the opaque types are distinct
+        // The solution is to use trait objects:
+        fn returns_closure() -> Box<dyn Fn(i32) -> i32> {
+            Box::new(|x| x + 1)
+        }
+
+        fn returns_initialized_closure(init: i32) -> Box<dyn Fn(i32) -> i32> {
+            Box::new(move |x| x + init)
+        }
+
+        let handlers = vec![returns_closure(), returns_initialized_closure(123)];
+        for handler in handlers {
+            let output = handler(5);
+            println!("{output}");
+        }
+    }
+}
+
+fn macros() {}
