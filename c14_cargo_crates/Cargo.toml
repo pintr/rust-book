@@ -15,7 +15,7 @@
 [package]
 name = "c14_cargo_crates"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = "A package containing useful information on crates"
 license = "MIT OR Apache-2.0"
 
