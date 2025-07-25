@@ -22,9 +22,10 @@ members = [
     "c17_asynchronous_programming",
     "c18_object_oriented_programming",
     "c19_patterns_matching",
-    "c20_advanced_features", "c21_web_server",
+    "c20_advanced_features",
+    "c21_web_server",
 ]
-default-members = ["c20_advanced_features"]
+default-members = ["c21_web_server"]
 
 [profile.release]
 panic = 'abort'
