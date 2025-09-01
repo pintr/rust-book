@@ -36,7 +36,7 @@ fn single_threaded() {
         // The `incoming` method on `TcpListener` returns an iterator giving a sequence of streams of type `TcpStream`
         // A stream is an open connection between client and server, and a connection is the full request and response process.
         // `TcpStream` is used to to read the client request and write the server response. The loop will process each connection in turn.
-        for stream in listener.incoming() {
+        for (i, stream) in listener.incoming().enumerate() {
             // The `incoming` method could generate errors when the clinet can't connect, because, in fact, the iteration is on connection attempts.
             // The connection attempt might fail for multiple reasons, such as OSs with a limited number of possible open connections.
             // When `stream` goes out of scope  and is dropped at the end of the loop, the onneciton is closed as part of the `drop` implementation.
@@ -44,6 +44,11 @@ fn single_threaded() {
 
             println!("Connection established!");
             println!("{:?}", stream);
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
         }
         // Sometimes browsers deal with closed connections by retrying, and  they could open multiple connections to the same server
         // Each open connection is recognised as a different one, printing the info.
@@ -54,7 +59,7 @@ fn single_threaded() {
         // The concern are separated by getting the connection, and doing tasks on the connections.
         // The function `handle_connection` is used to read data from the TCP stream and print it:
         use std::{
-            io::{BufReader, prelude::*},
+            io::{BufRead, BufReader},
             net::{TcpListener, TcpStream},
         };
 
