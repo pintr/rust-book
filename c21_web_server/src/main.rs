@@ -8,6 +8,8 @@
 //! This is a small example of web server with thread pool, not the best available for a web server and thread pool.
 //! In the project async and await won't be used in order to keep it simple, without adding an async runtime.
 
+use std::io::Write;
+
 fn main() {
     single_threaded();
 }
@@ -55,23 +57,75 @@ fn single_threaded() {
     }
     {
         // Reading the Request
-        // Change the previous implementation to introduce the funcitonality of reading the request
+        // Change the previous implementation to introduce the functionality of reading the request
         // The concern are separated by getting the connection, and doing tasks on the connections.
         // The function `handle_connection` is used to read data from the TCP stream and print it:
         use std::{
-            io::{BufRead, BufReader},
+            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
             net::{TcpListener, TcpStream},
         };
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for stream in listener.incoming() {
+        for (i, stream) in listener.incoming().enumerate() {
             let stream = stream.unwrap();
 
-            handle_connection(stream);
+            handle_connection(stream); // Call `handle_connection` to work on the stream
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
         }
 
         fn handle_connection(stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream); // Create a `BufReader` that wraps a reference to the `stream`, additionally it adds buffering
+            let http_request: Vec<_> = buf_reader // `http_request` is used to collect the lines of the request, which are collected in a vector by adding the `Vec<_>` type
+                .lines() // `BufReader` implements the `BufRead` trait which provides the `lines` method that returns an iterator on the stream of data  of type `Result`, which is splitted when there is a newline byte
+                .map(|result| result.unwrap()) // To get each string is necessary to `map` and `unwrap` each result, in this version errors aren't handled
+                .take_while(|line| !line.is_empty()) // The browser signals the end of a HTTP request by sending two newline chars in a row so, to get a request, lines are taken until an empty string is obtained
+                .collect(); // The strings are collected into the vector to be printedusing the pretty debug format
+
+            println!("Request: {http_request:#?}");
+            // HTTP is a text based protocol, and a request takes the following format:
+            // ```Method Request-URI HTTP-Version CRLF
+            // headers CRLF
+            // message-body```
+            // The first line is the request line, that holds infomration about what a client is requesting
+            // The first part is the method being used (e.g. `GET`)
+            // The second part is the uniform resource identifier (URI) requested by the client
+            // The last part is the HTTP version used by the client, and it ends in a CRLF (carriage return and line feed) sequence, it could be `\r` for the carriage return, and `\n` as line feed, it prints as a new line.
+            // After this part, from `Host:` onward are headers, and `GET` requests have no body
+        }
+    }
+    {
+        // Writing a Response
+        // A response to a HTTP request have this format:
+        // ```HTTP-Version Status-Code Reason-Phrase CRLF
+        // headers CRLF
+        // message-body```
+        // The first line contains the HTTP version used in the response, a numeric status that summarises the result of the request, and a text description of the status code
+        // After the CRLF sequence there are the headers, another CRLF, and the body of the response, e.g. `HTTP/1.1 200 OK\r\n\r\n`
+        // The status code 200 is the default success response, this is used in this version of the web server:
+        use std::{
+            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            net::{TcpListener, TcpStream},
+        };
+
+        let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+        for (i, stream) in listener.incoming().enumerate() {
+            let stream = stream.unwrap();
+
+            handle_connection(stream); // Call `handle_connection` to work on the stream
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
+        }
+
+        fn handle_connection(mut stream: TcpStream) {
             let buf_reader = BufReader::new(&stream);
             let http_request: Vec<_> = buf_reader
                 .lines()
@@ -80,6 +134,148 @@ fn single_threaded() {
                 .collect();
 
             println!("Request: {http_request:#?}");
+
+            let response = "HTTP/1.1 200 OK\r\n\r\n"; // Response variable containing the success message's data
+
+            stream.write_all(response.as_bytes()).unwrap(); // The message is converted to bytes, and the `write_all` method on `stream` sends the bytes down the conection
+            // Since `write_all` could failit requires the `unwrap()`, here used on any error
+            // Now the `127.0.0.1:7878` page loads a blank page instead of an error
+        }
+    }
+    {
+        // Returning Real HTML
+        // Now, instead of sending an empty response, a the minimal HTML content of `hello.html` will be sent
+        use std::{
+            fs,
+            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            net::{TcpListener, TcpStream},
+        };
+
+        let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+        for (i, stream) in listener.incoming().enumerate() {
+            let stream = stream.unwrap();
+
+            handle_connection(stream); // Call `handle_connection` to work on the stream
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
+        }
+
+        fn handle_connection(mut stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream);
+            let http_request: Vec<_> = buf_reader
+                .lines()
+                .map(|result| result.unwrap())
+                .take_while(|line| !line.is_empty())
+                .collect();
+
+            println!("Request: {http_request:#?}");
+
+            let status_line = "HTTP/1.1 200 OK";
+            let contents = fs::read_to_string("utils/hello.html").unwrap(); // Use `fs` to read the content of the `hello.html` file in utils
+            let length = contents.len(); // To ensure a  valid HTTP response the `Content-Length` header is added to set the size of the length of the response body
+
+            let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+
+            stream.write_all(response.as_bytes()).unwrap();
+            // Currently the request data is ignored and the content of the `hello.html` file is sent back unconditionally, meanning that any GET request on 127.0.0.1:7878 will get the same response
+        }
+    }
+    {
+        // Validating the Request and Selectively Responding
+        // Right now the web server returns the HTML in the file `hello.html` unconditionally, let's check if the browser requests `/` before sending the HTML file, and return an error if something else is requested
+        // To do this `handle_connection` method needs to check if the URI is correct:
+        use std::{
+            fs,
+            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            net::{TcpListener, TcpStream},
+        };
+
+        let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+        for (i, stream) in listener.incoming().enumerate() {
+            let stream = stream.unwrap();
+
+            handle_connection(stream); // Call `handle_connection` to work on the stream
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
+        }
+
+        fn handle_connection(mut stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream);
+            let request_line = buf_reader.lines().next().unwrap().unwrap(); // Look at the first line of the response to check the URI
+            // The first `unwrap` takes care of the `Option`, while the second `unwrap` handles the `Result`, and has the same effect as the `unwrap` in the `map`
+
+            if request_line == "GET / HTTP/1.1" {
+                // Check if the `request_line` equals the request line of a GET to the `/` path, if it does return the `hello.html` file content
+                let status_line = "HTTP/1.1 200 OK";
+                let contents = fs::read_to_string("utils/hello.html").unwrap();
+                let length = contents.len();
+
+                let response =
+                    format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+
+                stream.write_all(response.as_bytes()).unwrap();
+            } else {
+                // If the request line differs from `/` return a 404 response with a the `404.html` file content referring to an unexisting resource (code 404)
+                let status_line = "HTTP/1.1 404 NOT FOUND";
+                let contents = fs::read_to_string("utils/404.html").unwrap();
+                let length = contents.len();
+
+                let response =
+                    format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+
+                stream.write_all(response.as_bytes()).unwrap();
+            }
+            // Now the program checks whether a user request for the `/` path and returns the content, otherwise it returns a 404 error page.
+        }
+    }
+    {
+        // A Touch of Refactoring
+        // In the previous version the `if` and `else` blocks have a lot of repetition, since they both read a file, and write the content to the stream, the only difference is in the status line and the filename.
+        // The code can be improved by pulling out the differences into separate `if` and `else` blocks that will assign the values of status line and filename, using the variables unconditionally, replacing the larger blocks.
+        use std::{
+            fs,
+            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            net::{TcpListener, TcpStream},
+        };
+
+        let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+        for (i, stream) in listener.incoming().enumerate() {
+            let stream = stream.unwrap();
+
+            handle_connection(stream); // Call `handle_connection` to work on the stream
+
+            if i == 4 {
+                // Limit to 5 connections to continue with the next experiments
+                break;
+            }
+        }
+
+        fn handle_connection(mut stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream);
+            let request_line = buf_reader.lines().next().unwrap().unwrap();
+
+            let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
+                ("HTTP/1.1 200 OK", "utils/hello.html")
+            } else {
+                ("HTTP/1.1 404 NOT FOUND", "utils/404.html")
+            };
+            // The assignment of `status_line` and `filename` is destructured and added to a tuple so there is no duplicated code
+
+            let contents = fs::read_to_string(filename).unwrap();
+            let length = contents.len();
+
+            let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+
+            stream.write_all(response.as_bytes()).unwrap();
         }
     }
 }

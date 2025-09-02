@@ -25,7 +25,7 @@ members = [
     "c20_advanced_features",
     "c21_web_server",
 ]
-default-members = ["c20_advanced_features"]
+default-members = ["c21_web_server"]
 
 [profile.release]
 panic = 'abort'
