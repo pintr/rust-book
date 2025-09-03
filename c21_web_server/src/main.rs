@@ -8,13 +8,12 @@
 //! This is a small example of web server with thread pool, not the best available for a web server and thread pool.
 //! In the project async and await won't be used in order to keep it simple, without adding an async runtime.
 
-use std::io::Write;
-
 fn main() {
-    single_threaded();
+    // single_threaded();
+    multi_threaded();
 }
 
-fn single_threaded() {
+fn _single_threaded() {
     // In order to build a single threaded web server it is necessary to have an overview of the protocols involved
     // The main request-response protocols are TCP and HTTP:
     // - TCP: Describe the details of how information gets form one server to another
@@ -108,7 +107,7 @@ fn single_threaded() {
         // After the CRLF sequence there are the headers, another CRLF, and the body of the response, e.g. `HTTP/1.1 200 OK\r\n\r\n`
         // The status code 200 is the default success response, this is used in this version of the web server:
         use std::{
-            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            io::{BufRead, BufReader, Write},
             net::{TcpListener, TcpStream},
         };
 
@@ -147,7 +146,7 @@ fn single_threaded() {
         // Now, instead of sending an empty response, a the minimal HTML content of `hello.html` will be sent
         use std::{
             fs,
-            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            io::{BufRead, BufReader, Write},
             net::{TcpListener, TcpStream},
         };
 
@@ -190,7 +189,7 @@ fn single_threaded() {
         // To do this `handle_connection` method needs to check if the URI is correct:
         use std::{
             fs,
-            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            io::{BufRead, BufReader, Write},
             net::{TcpListener, TcpStream},
         };
 
@@ -242,7 +241,7 @@ fn single_threaded() {
         // The code can be improved by pulling out the differences into separate `if` and `else` blocks that will assign the values of status line and filename, using the variables unconditionally, replacing the larger blocks.
         use std::{
             fs,
-            io::{BufRead, BufReader}, // Import BufRead and BufReader to access traits and types used in the stream
+            io::{BufRead, BufReader, Write},
             net::{TcpListener, TcpStream},
         };
 
@@ -276,6 +275,120 @@ fn single_threaded() {
             let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
             stream.write_all(response.as_bytes()).unwrap();
+        }
+    }
+}
+
+fn multi_threaded() {
+    // Currently the server processes each request in turn, meaning that it won't process a second request until the first is finished.
+    // This serial execution wou ld be less and less optimal when multiple requests are received, in particular if they are long.
+    {
+        // Simulating a Slow Request in the Current Server Implementation
+        // Here is the single threaded server with an additional URI `/sleep` that simulates a slow response
+        use std::{
+            fs,
+            io::{BufRead, BufReader, Write},
+            net::{TcpListener, TcpStream},
+            thread,
+            time::Duration,
+        };
+
+        let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+        for (i, stream) in listener.incoming().enumerate() {
+            let stream = stream.unwrap();
+            handle_connection(stream);
+
+            if i == 9 {
+                // Limit to 10 connections to continue with the next experiments
+                break;
+            }
+        }
+
+        fn handle_connection(mut stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream);
+            let request_line = buf_reader.lines().next().unwrap().unwrap();
+
+            let (status_line, filename) = match &request_line[..] {
+                // Switch from `if` to `match` since there are more than two cases
+                // This requires to match on a slice of `request_line` becuase it doesn't do automatic referencing and dereferencing
+                "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "utils/hello.html"),
+                "GET /sleep HTTP/1.1" => {
+                    thread::sleep(Duration::from_secs(5)); // Wait 5 second before sending the response
+
+                    ("HTTP/1.1 200 OK", "utils/hello.html")
+                }
+                _ => ("HTTP/1.1 404 NOT FOUND", "utils/404.html"),
+            };
+
+            let contents = fs::read_to_string(filename).unwrap();
+            let length = contents.len();
+
+            let response = format!("{status_line}\r\nCOntent-Length: {length}\r\n\r\n{contents}");
+
+            stream.write_all(response.as_bytes()).unwrap();
+
+            // Trying to load `/sleep` and then `/` the first request requires 5 seconds, the second one rquires the first to finish (so 5 seconds + time to respond)
+            // This can be avoided with multiple techniques, including using async and a thread pool
+        }
+    }
+    {
+        // Improving Throughput with a Thread Pool
+        // A thread pool is a group of spawned threads that are waiting and ready to handle a task.
+        // When the program reaceives a new task, it assigns one of the threads of the pool to that task, and that thread will process it.
+        // The remaining threads in the pool are available to handle any other task.
+        // When the first thread is done processing its task, it returns to the pool of idle threads, reasy to handle a new task.
+        // A thread pool allows to process connections concurrently, increasing the throughput of the server.
+        // In this example the number of threads will be limited to afixed number, to avoid DoS attacks.
+        // The requests that com in are sento to the pool for processing, the pool will maintain a queue.
+        // Each thread will pop off a request from this queue, handle the request, and then ask the queue for another request
+        // In this way, even with long running requests, the server is able to handle multiple requests concurrently
+        // This technique is one of many ways to improve thoughput of a web server.
+        // Other options include fork/join model, singlt-threaded async I7O model, and the multi-threaded async I/O model.
+        // Before implementing a thread pool it is important to write the clinet interface to guide the design, so write the APIs, and implement the functionalities.
+        // Here compiler-driven developmenmt is used, so first the functions will be written, and look at the compiler's errors to determine how to change the code to work.
+        // In this examples the use declarations and the `handle_connection` function will remain the same as before, so they will be reused for each version
+
+        use std::{
+            fs,
+            io::{BufRead, BufReader, Write},
+            net::{TcpListener, TcpStream},
+            thread,
+            time::Duration,
+        };
+
+        fn handle_connection(mut stream: TcpStream) {
+            let buf_reader = BufReader::new(&stream);
+            let request_line = buf_reader.lines().next().unwrap().unwrap();
+
+            let (status_line, filename) = match &request_line[..] {
+                // Switch from `if` to `match` since there are more than two cases
+                // This requires to match on a slice of `request_line` becuase it doesn't do automatic referencing and dereferencing
+                "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "utils/hello.html"),
+                "GET /sleep HTTP/1.1" => {
+                    thread::sleep(Duration::from_secs(5)); // Wait 5 second before sending the response
+
+                    ("HTTP/1.1 200 OK", "utils/hello.html")
+                }
+                _ => ("HTTP/1.1 404 NOT FOUND", "utils/404.html"),
+            };
+
+            let contents = fs::read_to_string(filename).unwrap();
+            let length = contents.len();
+
+            let response = format!("{status_line}\r\nCOntent-Length: {length}\r\n\r\n{contents}");
+
+            stream.write_all(response.as_bytes()).unwrap();
+
+            // Trying to load `/sleep` and then `/` the first request requires 5 seconds, the second one rquires the first to finish (so 5 seconds + time to respond)
+            // This can be avoided with multiple techniques, including using async and a thread pool
+        }
+
+        {
+            // Spawning a Thread for each Request
+            // This example creates a new thread for every connection.
+            // This isn't the final version because it's vulnerabel to DoS when an unlimited numebr of threads is spawned, but it's a starting point to a multithread web server.
+            // The next examples will rely on a thread pool
         }
     }
 }

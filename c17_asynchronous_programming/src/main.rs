@@ -4,7 +4,7 @@
 //! OSs already provide a form of concurrency with interrupts, which allow to switch context during its use, allowing multiple process to run simultaneously.
 //! In the same way programs may need to perform many operations in the same time, such as multiple downloads while using the UI: everything should work simultaneously without interruptions.
 //! For example a software downloading files could spawn a dedicated thread for each file to be downloaded without blocking the main thread.
-//! Rust allows to write asynchronous code in the same style of blocking code using `async` and `await` to solve concurrency problems, assitionally it allows to combine the async code with concurrency.
+//! Rust allows to write asynchronous code in the same style of blocking code using `async` and `await` to solve concurrency problems, additionally it allows to combine the async code with concurrency.
 //! There is difference between concurrency and parallelism:
 //! - Concurrency: an individual works on several different task before any of them is completed, requires switching.
 //! - Parallelism: two different task work independently at the same time.
@@ -267,7 +267,7 @@ fn concurrency_with_async() {
             trpl::join(tx_fut, rx_fut).await;
 
             // In this updated example the messages are printed at 500ms intervals rather then all togheter after 2s
-            // THe program still never exits because of the way `while let` interacts with `trpl::join`:
+            // The program still never exits because of the way `while let` interacts with `trpl::join`:
             // - The future returned from `trpl::join` completes only when both futures have completed
             // - The `tx` future completes once it finishes sleeping after sending all the messages, rx` won't complete auntil `while let` ends
             // - The `while let` loop won't end until awaiting `rx.recv` produces `None`, that happens only when the other end of the channel is closed via `rx.close`
@@ -329,7 +329,7 @@ fn concurrency_with_async() {
 
 fn multiple_futures() {
     use std::{
-        pin::{pin, Pin},
+        pin::{Pin, pin},
         thread,
         time::{Duration, Instant},
     };
