@@ -295,15 +295,15 @@ fn multi_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
-            let stream = stream.unwrap();
-            handle_connection(stream);
+        // for (i, stream) in listener.incoming().enumerate() {
+        //     let stream = stream.unwrap();
+        //     handle_connection(stream);
 
-            if i == 9 {
-                // Limit to 10 connections to continue with the next experiments
-                break;
-            }
-        }
+        //     if i == 9 {
+        //         // Limit to 10 connections to continue with the next experiments
+        //         break;
+        //     }
+        // }
 
         fn handle_connection(mut stream: TcpStream) {
             let buf_reader = BufReader::new(&stream);
@@ -383,12 +383,44 @@ fn multi_threaded() {
             // Trying to load `/sleep` and then `/` the first request requires 5 seconds, the second one rquires the first to finish (so 5 seconds + time to respond)
             // This can be avoided with multiple techniques, including using async and a thread pool
         }
-
         {
             // Spawning a Thread for each Request
             // This example creates a new thread for every connection.
             // This isn't the final version because it's vulnerabel to DoS when an unlimited numebr of threads is spawned, but it's a starting point to a multithread web server.
             // The next examples will rely on a thread pool
+            let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+            for (i, stream) in listener.incoming().enumerate() {
+                let stream = stream.unwrap();
+
+                thread::spawn(|| {
+                    // Create a new thread that runs `handle_connection`
+                    handle_connection(stream);
+                });
+
+                if i == 9 {
+                    // Limit to 10 connections to continue with the next experiments
+                    break;
+                }
+            }
+        }
+        {
+            // Creating a Finite Number of Threads
+            // Switching from threads to a thread pool shouldn't need large changes
+            use c21_web_server::ThreadPool; // Bring the `ThreadPool` struct from lib.rs into scope
+
+            let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+            let pool = ThreadPool::new(4); // This should be the way to create a thread pool with a ocnfigurable number of threads
+
+            for stream in listener.incoming() {
+                let stream = stream.unwrap();
+
+                pool.execute(|| {
+                    // `pool.execute` has a similar interface as `thread::spawn`: it takes a closur the pool should run for each stream
+                    handle_connection(stream);
+                });
+            }
+            // This code will compile once the `ThreadPool` is completed in `src/lib.rs`, it is built using a compiler driven development
         }
     }
 }
