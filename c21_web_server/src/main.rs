@@ -388,21 +388,21 @@ fn multi_threaded() {
             // This example creates a new thread for every connection.
             // This isn't the final version because it's vulnerabel to DoS when an unlimited numebr of threads is spawned, but it's a starting point to a multithread web server.
             // The next examples will rely on a thread pool
-            let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+            // let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-            for (i, stream) in listener.incoming().enumerate() {
-                let stream = stream.unwrap();
+            // for (i, stream) in listener.incoming().enumerate() {
+            //     let stream = stream.unwrap();
 
-                thread::spawn(|| {
-                    // Create a new thread that runs `handle_connection`
-                    handle_connection(stream);
-                });
+            //     thread::spawn(|| {
+            //         // Create a new thread that runs `handle_connection`
+            //         handle_connection(stream);
+            //     });
 
-                if i == 9 {
-                    // Limit to 10 connections to continue with the next experiments
-                    break;
-                }
-            }
+            //     if i == 9 {
+            //         // Limit to 10 connections to continue with the next experiments
+            //         break;
+            //     }
+            // }
         }
         {
             // Creating a Finite Number of Threads
