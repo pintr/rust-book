@@ -9,11 +9,11 @@
 //! In the project async and await won't be used in order to keep it simple, without adding an async runtime.
 
 fn main() {
-    // single_threaded();
+    single_threaded();
     multi_threaded();
 }
 
-fn _single_threaded() {
+fn single_threaded() {
     // In order to build a single threaded web server it is necessary to have an overview of the protocols involved
     // The main request-response protocols are TCP and HTTP:
     // - TCP: Describe the details of how information gets form one server to another
@@ -37,7 +37,8 @@ fn _single_threaded() {
         // The `incoming` method on `TcpListener` returns an iterator giving a sequence of streams of type `TcpStream`
         // A stream is an open connection between client and server, and a connection is the full request and response process.
         // `TcpStream` is used to to read the client request and write the server response. The loop will process each connection in turn.
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             // The `incoming` method could generate errors when the clinet can't connect, because, in fact, the iteration is on connection attempts.
             // The connection attempt might fail for multiple reasons, such as OSs with a limited number of possible open connections.
             // When `stream` goes out of scope  and is dropped at the end of the loop, the onneciton is closed as part of the `drop` implementation.
@@ -45,11 +46,6 @@ fn _single_threaded() {
 
             println!("Connection established!");
             println!("{:?}", stream);
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
         // Sometimes browsers deal with closed connections by retrying, and  they could open multiple connections to the same server
         // Each open connection is recognised as a different one, printing the info.
@@ -66,15 +62,11 @@ fn _single_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             let stream = stream.unwrap();
 
             handle_connection(stream); // Call `handle_connection` to work on the stream
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
 
         fn handle_connection(stream: TcpStream) {
@@ -113,15 +105,11 @@ fn _single_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             let stream = stream.unwrap();
 
             handle_connection(stream); // Call `handle_connection` to work on the stream
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
 
         fn handle_connection(mut stream: TcpStream) {
@@ -152,15 +140,11 @@ fn _single_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             let stream = stream.unwrap();
 
             handle_connection(stream); // Call `handle_connection` to work on the stream
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
 
         fn handle_connection(mut stream: TcpStream) {
@@ -195,15 +179,11 @@ fn _single_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             let stream = stream.unwrap();
 
             handle_connection(stream); // Call `handle_connection` to work on the stream
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
 
         fn handle_connection(mut stream: TcpStream) {
@@ -247,15 +227,11 @@ fn _single_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        for (i, stream) in listener.incoming().enumerate() {
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
             let stream = stream.unwrap();
 
             handle_connection(stream); // Call `handle_connection` to work on the stream
-
-            if i == 4 {
-                // Limit to 5 connections to continue with the next experiments
-                break;
-            }
         }
 
         fn handle_connection(mut stream: TcpStream) {
@@ -295,15 +271,11 @@ fn multi_threaded() {
 
         let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-        // for (i, stream) in listener.incoming().enumerate() {
-        //     let stream = stream.unwrap();
-        //     handle_connection(stream);
-
-        //     if i == 9 {
-        //         // Limit to 10 connections to continue with the next experiments
-        //         break;
-        //     }
-        // }
+        // Limit to 5 connections to continue with the next experiments
+        for stream in listener.incoming().take(5) {
+            let stream = stream.unwrap();
+            handle_connection(stream);
+        }
 
         fn handle_connection(mut stream: TcpStream) {
             let buf_reader = BufReader::new(&stream);
@@ -388,21 +360,17 @@ fn multi_threaded() {
             // This example creates a new thread for every connection.
             // This isn't the final version because it's vulnerabel to DoS when an unlimited numebr of threads is spawned, but it's a starting point to a multithread web server.
             // The next examples will rely on a thread pool
-            // let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+            let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-            // for (i, stream) in listener.incoming().enumerate() {
-            //     let stream = stream.unwrap();
+            // Limit to 5 connections to continue with the next experiments
+            for stream in listener.incoming().take(5) {
+                let stream = stream.unwrap();
 
-            //     thread::spawn(|| {
-            //         // Create a new thread that runs `handle_connection`
-            //         handle_connection(stream);
-            //     });
-
-            //     if i == 9 {
-            //         // Limit to 10 connections to continue with the next experiments
-            //         break;
-            //     }
-            // }
+                thread::spawn(|| {
+                    // Create a new thread that runs `handle_connection`
+                    handle_connection(stream);
+                });
+            }
         }
         {
             // Creating a Finite Number of Threads
@@ -412,7 +380,11 @@ fn multi_threaded() {
             let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
             let pool = ThreadPool::new(4); // This should be the way to create a thread pool with a ocnfigurable number of threads
 
-            for stream in listener.incoming() {
+            // for stream in listener.incoming() {
+            // [8] Graceful shutdown of the server after 10 requests
+            // The `take` method is defined in the `Iterator` trait and limits the iteration
+            // Then the `ThreadPool` will go out of scope at the end of main, and `drop` will run.
+            for stream in listener.incoming().take(10) {
                 let stream = stream.unwrap();
 
                 pool.execute(|| {
@@ -420,6 +392,8 @@ fn multi_threaded() {
                     handle_connection(stream);
                 });
             }
+
+            println!("Shutting down.");
             // This code will compile once the `ThreadPool` is completed in `src/lib.rs`, it is built using a compiler driven development
         }
     }
